@@ -19,6 +19,10 @@ class Video(db.Model):
     def __repr__(self):
         return '<Video %r>' % self.title
 
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 
 class VideoSchema(ModelSchema):
 
