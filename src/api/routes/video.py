@@ -1,4 +1,5 @@
 import os
+import time
 from flask import Blueprint, request, current_app
 from flask_restful import Api, Resource
 from api.models.video import VideoSchema, Video
@@ -51,9 +52,18 @@ class UploadFiles(Resource):
 
     def post(self):
         file = request.files['upload_file']
-        file.save(
-            os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename))
-        return {'upload_file': file.filename}, 200
+        timestamp = time.time()
+        filename = file.filename + '+' + timestamp
+        filepath = os.path.join(
+            os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+        with open(filepath, 'bw') as f:
+            chunk_size = 1024
+            while True:
+                chunk = request.stream.read(chunk_size)
+                if len(chunk) == 0:
+                    break
+                f.write(chunk_size)
+        return {'upload_file': filename}, 200
 
 
 video_api.add_resource(VideoItem, '/video/<int:id>')
