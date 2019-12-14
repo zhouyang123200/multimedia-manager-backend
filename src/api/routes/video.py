@@ -51,9 +51,7 @@ class VideoList(Resource):
 class UploadFiles(Resource):
 
     def post(self):
-        file = request.files['upload_file']
-        timestamp = time.time()
-        filename = file.filename + '+' + timestamp
+        filename = str(time.time())
         filepath = os.path.join(
             os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
         with open(filepath, 'bw') as f:
@@ -62,8 +60,8 @@ class UploadFiles(Resource):
                 chunk = request.stream.read(chunk_size)
                 if len(chunk) == 0:
                     break
-                f.write(chunk_size)
-        return {'upload_file': filename}, 200
+                f.write(chunk)
+        return {'timestamp': filename}, 200
 
 
 video_api.add_resource(VideoItem, '/video/<int:id>')
