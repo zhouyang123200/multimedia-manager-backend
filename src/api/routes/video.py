@@ -61,9 +61,10 @@ class UploadFiles(Resource):
                 if len(chunk) == 0:
                     break
                 f.write(chunk)
+        print(filename)
         return {'timestamp': filename}, 200
 
 
-video_api.add_resource(VideoItem, '/video/<int:id>')
-video_api.add_resource(VideoList, '/videos')
-video_api.add_resource(UploadFiles, '/files')
+video_api.add_resource(VideoItem, '/api/video/<int:id>')
+video_api.add_resource(VideoList, '/api/videos')
+video_api.add_resource(UploadFiles, '/api/files')
