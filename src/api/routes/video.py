@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 from flask import Blueprint, request, current_app
 from flask_restful import Api, Resource
@@ -42,10 +43,49 @@ class VideoList(Resource):
         return result, 200
 
     def post(self):
+        ret = {}, 200
         data = request.get_json()
-        video = self.video_schema.load(data)
-        result = self.video_schema.dump(video.save())
-        return result, 201
+        video_data = self.convert_timestamp_info(data)
+        if not video_data:
+            ret = {'msg': 'timestamp error'}, 400
+            return ret
+        else:
+            video = self.video_schema.load(video_data)
+            ret = self.video_schema.dump(video.save())
+            return ret, 201
+
+    @staticmethod
+    def convert_timestamp_info(data):
+        ret = True
+        video_num = data.get('video_num')
+        image_num = data.get('image_num')
+        video_name = data.get('video_name')
+        image_name = data.get('image_name')
+        video_path = os.path.join(
+            current_app.config['UPLOAD_FOLDER'], video_num)
+        image_path = os.path.join(
+            current_app.config['UPLOAD_FOLDER'], image_num)
+        if not video_num or not os.path.exists(video_path):
+            ret = False
+        if not image_num or not os.path.exists(image_path):
+            ret = False
+        if ret:
+            video_storage_path = os.path.join(
+                current_app.config['VIDEO_STORAGE_PATH'],
+                video_name
+            )
+            image_storage_path = os.path.join(
+                current_app.config['IMAGE_STORAGE_PATH'],
+                image_name
+            )
+            shutil.move(video_path, video_storage_path)
+            shutil.move(image_path, image_storage_path)
+            ret = dict()
+            ret['video_url'] = video_storage_path
+            ret['image_url'] = image_storage_path
+            ret['title'] = data.get('title')
+            ret['description'] = data.get('description')
+        return ret
 
 
 class UploadFiles(Resource):
