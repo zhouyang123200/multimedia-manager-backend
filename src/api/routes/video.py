@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 import time
 from flask import Blueprint, request, current_app
@@ -12,10 +13,20 @@ video_api = Api(video_route)
 class VideoItem(Resource):
 
     video_schema = VideoSchema()
+    static_url = '/static/'
+    media_url = '/media/'
 
     def get(self, id):
         video = Video.query.get(id)
         result = self.video_schema.dump(video)
+        image_filename = os.path.basename(result['image_url'])
+        image_url = os.path.join(self.static_url, image_filename)
+        result['imageUrl'] = image_url
+        video_filename = os.path.basename(result['video_url'])
+        video_url = os.path.join(self.media_url, video_filename)
+        result['videoUrl'] = video_url
+        del result['image_url']
+        del result['video_url']
         return result, 200
 
     def put(self, id):
@@ -36,10 +47,16 @@ class VideoItem(Resource):
 class VideoList(Resource):
 
     video_schema = VideoSchema()
+    static_url = '/static/'
 
     def get(self):
         videos = Video.query.all()
         result = self.video_schema.dumps(videos, many=True)
+        result = json.loads(result)
+        for item in result:
+            image_filename = os.path.basename(item['image_url'])
+            image_url = os.path.join(self.static_url, image_filename)
+            item['imageUrl'] = image_url
         return result, 200
 
     def post(self):
