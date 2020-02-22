@@ -10,7 +10,7 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///../database.db'
-    UPLOAD_FOLDER = '/tmp/test_video'
+    UPLOAD_FOLDER = '/mnt/data/tmp/'
     VIDEO_STORAGE_PATH = '/mnt/data/test_video'
     IMAGE_STORAGE_PATH = '/mnt/data/test_image'
     BASE_IMAGE_URL = '/images/'
