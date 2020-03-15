@@ -5,18 +5,15 @@ from api.utils.database import db
 from api.routes.video import video_route
 
 
-app = Flask(__name__)
+def create_app(config):
+    app = Flask(__name__)
 
-if os.environ.get('WORK_ENV') == 'PROD':
-    app.config.from_object(ProductionConfig)
-else:
-    app.config.from_object(DevelopmentConfig)
+    app.config.from_object(config)
 
-db.init_app(app)
-with app.app_context():
-    db.create_all()
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
 
-app.register_blueprint(video_route)
+    app.register_blueprint(video_route)
 
-if __name__ == "__main__":
-    app.run(port=5000)
+    return app
