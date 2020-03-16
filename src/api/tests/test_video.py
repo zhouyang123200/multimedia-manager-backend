@@ -1,11 +1,8 @@
-from main import app
+from . import client
 
 
-class TestUploadFiles:
+def test_empty_db(client):
+    """Start with a blank database."""
 
-    @classmethod
-    def setup_class(cls):
-        pass
-
-    def test_post(self):
-        pass
+    rv = client.get('/api/videos')
+    assert b'[]' in rv.data

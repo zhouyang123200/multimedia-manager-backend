@@ -17,3 +17,10 @@ jobs:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
           paths:
             - "venv"
+      - run:
+          name: excute unit test
+          command:  |
+            . venv/bin/activate
+            cd src && python -m pytest
+      - store_test_results:
+          path: test-results
