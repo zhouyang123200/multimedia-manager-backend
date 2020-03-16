@@ -20,6 +20,6 @@ jobs:
       - run:
           name: excute unit test
           command:  |
-          cd src && python -m pytest
+            cd src && python -m pytest
       - store_test_results:
           path: test-results
