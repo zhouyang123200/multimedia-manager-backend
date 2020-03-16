@@ -22,4 +22,4 @@ jobs:
           command:  |
           cd src && python -m pytest
       - store_test_results:
-        path: test-results
+          path: test-results
