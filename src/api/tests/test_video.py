@@ -1,8 +1,7 @@
-from . import client
 
 
-def test_empty_db(client):
+def test_empty_db(app):
     """Start with a blank database."""
 
-    rv = client.get('/api/videos')
+    rv = app.test_client().get('/api/videos')
     assert b'[]' in rv.data
