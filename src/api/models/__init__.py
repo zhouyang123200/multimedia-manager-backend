@@ -1,2 +1,2 @@
-from .file import File
+from .file import VideoFile, ImageFile
 from .video import Video, VideoSchema

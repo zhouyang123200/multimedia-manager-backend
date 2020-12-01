@@ -8,8 +8,8 @@ class Video(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), unique=True, nullable=True)
-    video_files = db.relationship('File', lazy=False)
-    image_files = db.relationship('File', lazy=False)
+    video_files = db.relationship('VideoFile', backref='video', lazy=False)
+    image_files = db.relationship('ImageFile', backref='video', lazy=False)
     description = db.Column(db.String(120))
 
     def save(self):
