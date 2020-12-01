@@ -2,13 +2,14 @@ from api.utils.database import db
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow import fields
 
-
 class Video(db.Model):
+
+    _tablename_ = 'video'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), unique=True, nullable=True)
-    image_url = db.Column(db.String(120), unique=True, nullable=True)
-    video_url = db.Column(db.String(120), unique=True, nullable=True)
+    video_files = db.relationship('File', lazy=False)
+    image_files = db.relationship('File', lazy=False)
     description = db.Column(db.String(120))
 
     def save(self):
@@ -32,6 +33,5 @@ class VideoSchema(ModelSchema):
 
     id = fields.Number(dump_only=True)
     title = fields.String(required=True)
-    image_url = fields.String(required=True)
-    video_url = fields.String(required=True)
+    
     description = fields.String(required=True)

@@ -1,6 +1,6 @@
 class Config(object):
     DEBUG = True
-    UPLOAD_FOLDER = '/mnt/data/tmp/'
+    UPLOAD_FOLDER = '/tmp/data'
     VIDEO_STORAGE_PATH = '/mnt/data/test_video'
     IMAGE_STORAGE_PATH = '/mnt/data/test_image'
     BASE_IMAGE_URL = '/images/'
