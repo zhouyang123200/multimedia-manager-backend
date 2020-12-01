@@ -4,7 +4,7 @@ import shutil
 import time
 from flask import Blueprint, request, current_app
 from flask_restful import Api, Resource
-from api.models.video import VideoSchema, Video
+from api.models import VideoSchema, Video
 
 video_route = Blueprint('video_route', __name__)
 video_api = Api(video_route)
@@ -76,12 +76,14 @@ class VideoList(Resource):
         ret = True
         video_num = data.get('video_num')
         image_num = data.get('image_num')
+        image_nums = data.get('image_nums')
         video_name = data.get('video_name')
         image_name = data.get('image_name')
         video_path = os.path.join(
             current_app.config['UPLOAD_FOLDER'], video_num)
         image_path = os.path.join(
             current_app.config['UPLOAD_FOLDER'], image_num)
+        images_path = [image for image in image_nums]
         if not video_num or not os.path.exists(video_path):
             ret = False
         if not image_num or not os.path.exists(image_path):
