@@ -41,7 +41,23 @@ class ImageFile(FileMixin, db.Model):
 class VideoFileSchema(ModelSchema):
 
     class Meta(ModelSchema.Meta):
-        model = Video
+        model = VideoFile
+        sqla_session = db.session
+    
+    name = fields.String(required=True)
+    file_path = fields.String(load_only=True)
+    url = fields.Function(
+        lambda obj: os.path.join(
+            current_app.config['HOST'],
+            current_app.config['STATIC_URL'],
+            obj.file_path
+        ))
+
+
+class ImageFileSchema(ModelSchema):
+
+    class Meta(ModelSchema.Meta):
+        model = ImageFile
         sqla_session = db.session
     
     name = fields.String(required=True)

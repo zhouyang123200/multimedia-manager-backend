@@ -19,20 +19,14 @@ class VideoItem(Resource):
     def get(self, id):
         video = Video.query.get(id)
         result = self.video_schema.dump(video)
-        image_filename = os.path.basename(result['image_url'])
-        image_url = os.path.join(self.static_url, image_filename)
-        result['imageUrl'] = image_url
-        video_filename = os.path.basename(result['video_url'])
-        video_url = os.path.join(self.media_url, video_filename)
-        result['videoUrl'] = video_url
-        del result['image_url']
-        del result['video_url']
         return result, 200
 
     def put(self, id):
         video = Video.query.get(id)
+        data = request.get_json()
         for key, value in video.items():
-            setattr(video, key, value)
+            if key in data:
+                setattr(video, key, data.get(key))
         video.save()
         result = self.video_schema.dump(video)
         return result, 200
@@ -47,63 +41,48 @@ class VideoItem(Resource):
 class VideoList(Resource):
 
     video_schema = VideoSchema()
-    static_url = '/static/'
 
     def get(self):
         videos = Video.query.all()
         result = self.video_schema.dumps(videos, many=True)
-        result = json.loads(result)
-        for item in result:
-            image_filename = os.path.basename(item['image_url'])
-            image_url = os.path.join(self.static_url, image_filename)
-            item['imageUrl'] = image_url
         return result, 200
 
     def post(self):
-        ret = {}, 200
         data = request.get_json()
         video_data = self.convert_timestamp_info(data)
-        if not video_data:
-            ret = {'msg': 'timestamp error'}, 400
-            return ret
-        else:
-            video = self.video_schema.load(video_data)
-            ret = self.video_schema.dump(video.save())
-            return ret, 201
+        video = self.video_schema.load(video_data)
+        ret = self.video_schema.dump(video.save())
+        return ret, 201
 
     @staticmethod
     def convert_timestamp_info(data):
-        ret = True
-        video_num = data.get('video_num')
-        image_num = data.get('image_num')
-        image_nums = data.get('image_nums')
-        video_name = data.get('video_name')
-        image_name = data.get('image_name')
-        video_path = os.path.join(
-            current_app.config['UPLOAD_FOLDER'], video_num)
-        image_path = os.path.join(
-            current_app.config['UPLOAD_FOLDER'], image_num)
-        images_path = [image for image in image_nums]
-        if not video_num or not os.path.exists(video_path):
-            ret = False
-        if not image_num or not os.path.exists(image_path):
-            ret = False
-        if ret:
-            video_storage_path = os.path.join(
-                current_app.config['VIDEO_STORAGE_PATH'],
-                video_name
-            )
-            image_storage_path = os.path.join(
-                current_app.config['IMAGE_STORAGE_PATH'],
-                image_name
-            )
-            shutil.move(video_path, video_storage_path)
-            shutil.move(image_path, image_storage_path)
-            ret = dict()
-            ret['video_url'] = video_storage_path
-            ret['image_url'] = image_storage_path
-            ret['title'] = data.get('title')
-            ret['description'] = data.get('description')
+        videos = data.get('videos')
+        images = data.get('images')
+
+        # judge the exits of video and images
+        upload_path = current_app.config['UPLOAD_FOLDER']
+        storage_path = current_app.config['FILE_STORAGE_PATH']
+        title = data.get('title')
+        storage_dir = os.path.join(storage_path, title)
+
+        for video in videos:
+            video_num = video.get('video_num')
+            video_name = video.get('video_name')
+            video_upload_path = os.path.join(upload_path, video_num)
+            video_storage_path = os.path.join(storage_dir, video_name)      
+            shutil.move(video_upload_path, video_storage_path)
+            video['file_path'] = os.path.join(title, video_name)
+            del video['video_num']
+
+        for image in images:
+            image_num = image.get('image_num')
+            image_name = image.get('image_name')
+            image_upload_path = os.path.join(upload_path, image_num)
+            image_storage_path = os.path.join(storage_dir, image_name)
+            shutil.move(image_upload_path, image_storage_path)
+            image['file_path'] = os.path.join(title, image_name)
+            del image['image_num']
+
         return ret
 
 
