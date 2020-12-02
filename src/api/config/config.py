@@ -1,9 +1,9 @@
 class Config(object):
     DEBUG = True
     UPLOAD_FOLDER = '/tmp/data'
-    VIDEO_STORAGE_PATH = '/mnt/data/test_video'
-    IMAGE_STORAGE_PATH = '/mnt/data/test_image'
-    BASE_IMAGE_URL = '/images/'
+    FILE_STORAGE_PATH = '/home/Videos/test_videos'
+    HOST = '127.0.0.1'
+    STATIC_URL = 'static/'
     MAX_CONTENT_LENGTH = 10000 * 1024 * 1024
 
 
