@@ -1,11 +1,14 @@
+import os
 from datetime import datetime
 from api.utils.database import db
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow import fields
+from flask import current_app
 
 class FileMixin:
     id = db.Column(db.Integer, primary_key=True)
-    file_path = db.Column(db.String(120), unique=True, nullable=True)
+    name = db.Column(db.String(50), nullable=False)
+    file_path = db.Column(db.String(120), unique=True, nullable=False)
     created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def save(self):
@@ -34,3 +37,18 @@ class ImageFile(FileMixin, db.Model):
 
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
 
+
+class VideoFileSchema(ModelSchema):
+
+    class Meta(ModelSchema.Meta):
+        model = Video
+        sqla_session = db.session
+    
+    name = fields.String(required=True)
+    file_path = fields.String(load_only=True)
+    url = fields.Function(
+        lambda obj: os.path.join(
+            current_app.config['HOST'],
+            current_app.config['STATIC_URL'],
+            obj.file_path
+        ))
