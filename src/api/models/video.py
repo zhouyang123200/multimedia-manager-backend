@@ -2,7 +2,7 @@ from api.utils.database import db
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_sqlalchemy.fields import Nested
 from marshmallow import fields
-from .file import VideoFileSchema
+from .file import VideoFileSchema, ImageFileSchema
 
 class Video(db.Model):
 
@@ -35,5 +35,6 @@ class VideoSchema(ModelSchema):
 
     id = fields.Number(dump_only=True)
     title = fields.String(required=True)
-    video = Nested(VideoFileSchema, many=True, exclude=("video",))
+    video_files = Nested(VideoFileSchema, many=True, exclude=("video","id", "created"))
+    image_files = Nested(ImageFileSchema, many=True, exclude=("video","id", "created"))
     description = fields.String(required=True)
