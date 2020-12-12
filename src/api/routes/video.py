@@ -65,7 +65,8 @@ class VideoList(Resource):
         storage_path = current_app.config['FILE_STORAGE_PATH']
         title = data.get('title')
         storage_dir = os.path.join(storage_path, title)
-        pathlib.Path(storage_dir).mkdir(exist_ok=True)
+
+        pathlib.Path(storage_dir).mkdir(parents=True, exist_ok=True)
 
         for video in videos:
             video_num = video.get('num')
