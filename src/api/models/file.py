@@ -1,9 +1,10 @@
 import os
 from datetime import datetime
-from api.utils.database import db
-from marshmallow_sqlalchemy import ModelSchema
-from marshmallow import fields
 from flask import current_app
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy import fields as sqlma_fileds
+from marshmallow import fields
+from api.utils.database import db
 
 class FileMixin:
     id = db.Column(db.Integer, primary_key=True)
@@ -26,24 +27,27 @@ class FileMixin:
 
 class VideoFile(FileMixin, db.Model):
 
-    _tablename_ = 'video_file'
+    __tablename__ = 'video_file'
 
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
 
 
 class ImageFile(FileMixin, db.Model):
 
-    _tablename_ = 'image_file'
+    __tablename__ = 'image_file'
 
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
 
 
-class VideoFileSchema(ModelSchema):
+class VideoFileSchema(SQLAlchemySchema):
 
-    class Meta(ModelSchema.Meta):
+    class Meta:
         model = VideoFile
+        load_instance = True
         sqla_session = db.session
     
+    id = auto_field()
+    created = auto_field()
     name = fields.String(required=True)
     file_path = fields.String(load_only=True)
     url = fields.Function(
@@ -54,12 +58,15 @@ class VideoFileSchema(ModelSchema):
         ))
 
 
-class ImageFileSchema(ModelSchema):
+class ImageFileSchema(SQLAlchemySchema):
 
-    class Meta(ModelSchema.Meta):
+    class Meta:
         model = ImageFile
+        load_instance = True
         sqla_session = db.session
     
+    id = auto_field()
+    created = auto_field()
     name = fields.String(required=True)
     file_path = fields.String(load_only=True)
     url = fields.Function(

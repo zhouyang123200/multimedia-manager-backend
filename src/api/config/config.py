@@ -1,7 +1,7 @@
 class Config(object):
     DEBUG = True
     UPLOAD_FOLDER = '/tmp/data'
-    FILE_STORAGE_PATH = '/home/Videos/test_videos'
+    FILE_STORAGE_PATH = '/home/zhouyang/Videos/test_videos'
     HOST = '127.0.0.1'
     STATIC_URL = 'static/'
     MAX_CONTENT_LENGTH = 10000 * 1024 * 1024
