@@ -1,4 +1,5 @@
 import os
+import pathlib
 import json
 import shutil
 import time
@@ -56,8 +57,8 @@ class VideoList(Resource):
 
     @staticmethod
     def convert_timestamp_info(data):
-        videos = data.get('videos')
-        images = data.get('images')
+        videos = data.get('video_files')
+        images = data.get('image_files')
 
         # judge the exits of video and images
         upload_path = current_app.config['UPLOAD_FOLDER']
@@ -65,25 +66,27 @@ class VideoList(Resource):
         title = data.get('title')
         storage_dir = os.path.join(storage_path, title)
 
+        pathlib.Path(storage_dir).mkdir(parents=True, exist_ok=True)
+
         for video in videos:
-            video_num = video.get('video_num')
-            video_name = video.get('video_name')
+            video_num = video.get('num')
+            video_name = video.get('name')
             video_upload_path = os.path.join(upload_path, video_num)
             video_storage_path = os.path.join(storage_dir, video_name)      
             shutil.move(video_upload_path, video_storage_path)
             video['file_path'] = os.path.join(title, video_name)
-            del video['video_num']
+            del video['num']
 
         for image in images:
-            image_num = image.get('image_num')
-            image_name = image.get('image_name')
+            image_num = image.get('num')
+            image_name = image.get('name')
             image_upload_path = os.path.join(upload_path, image_num)
             image_storage_path = os.path.join(storage_dir, image_name)
             shutil.move(image_upload_path, image_storage_path)
             image['file_path'] = os.path.join(title, image_name)
-            del image['image_num']
+            del image['num']
 
-        return ret
+        return data
 
 
 class UploadFiles(Resource):

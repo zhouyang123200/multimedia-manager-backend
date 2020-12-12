@@ -1,17 +1,17 @@
 from api.utils.database import db
-from marshmallow_sqlalchemy import ModelSchema
-from marshmallow_sqlalchemy.fields import Nested
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy import fields as sqlma_fields
 from marshmallow import fields
 from .file import VideoFileSchema, ImageFileSchema
 
 class Video(db.Model):
 
-    _tablename_ = 'video'
+    __tablename__ = 'video'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), unique=True, nullable=True)
-    video_files = db.relationship('VideoFile', backref='video', lazy=False)
-    image_files = db.relationship('ImageFile', backref='video', lazy=False)
+    video_files = db.relationship('VideoFile', backref=db.backref('video'), lazy=False)
+    image_files = db.relationship('ImageFile', backref=db.backref('video'), lazy=False)
     description = db.Column(db.String(120))
 
     def save(self):
@@ -27,14 +27,15 @@ class Video(db.Model):
         db.session.commit()
 
 
-class VideoSchema(ModelSchema):
+class VideoSchema(SQLAlchemySchema):
 
-    class Meta(ModelSchema.Meta):
+    class Meta:
         model = Video
         sqla_session = db.session
+        load_instance = True
 
     id = fields.Number(dump_only=True)
     title = fields.String(required=True)
-    video_files = Nested(VideoFileSchema, many=True, exclude=("video","id", "created"))
-    image_files = Nested(ImageFileSchema, many=True, exclude=("video","id", "created"))
+    video_files = sqlma_fields.Nested(VideoFileSchema, many=True, exclude=("id", "created"))
+    image_files = sqlma_fields.Nested(ImageFileSchema, many=True, exclude=("id", "created"))
     description = fields.String(required=True)
