@@ -2,6 +2,7 @@ import hashlib
 import io
 import json
 import os
+from ..utils.database import db
 
 
 def md5(file):
@@ -12,6 +13,9 @@ def md5(file):
 
 
 def test_file_upload(app, shared_datadir):
+    """
+    test file upload api
+    """
     file_name = 'sample.mp4'
     f_video = (shared_datadir / file_name)
     f_video_stream = io.BytesIO()
