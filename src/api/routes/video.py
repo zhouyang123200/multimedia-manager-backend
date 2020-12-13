@@ -2,10 +2,12 @@ import os
 import pathlib
 import json
 import shutil
+import http
 import time
 from flask import Blueprint, request, current_app
 from flask_restful import Api, Resource
 from api.models import VideoSchema, Video
+from api.utils.request_validate import mash_load_validate
 
 video_route = Blueprint('video_route', __name__)
 video_api = Api(video_route)
@@ -20,7 +22,7 @@ class VideoItem(Resource):
     def get(self, id):
         video = Video.query.get(id)
         result = self.video_schema.dump(video)
-        return result, 200
+        return result, http.HTTPStatus.OK
 
     def put(self, id):
         video = Video.query.get(id)
@@ -30,13 +32,13 @@ class VideoItem(Resource):
                 setattr(video, key, data.get(key))
         video.save()
         result = self.video_schema.dump(video)
-        return result, 200
+        return result, http.HTTPStatus.NO_CONTENT
 
     def delete(self, id):
         video = Video.query.get(id)
         if video:
             video.delete()
-        return {}, 204
+        return {}, http.HTTPStatus.NO_CONTENT
 
 
 class VideoList(Resource):
@@ -46,14 +48,14 @@ class VideoList(Resource):
     def get(self):
         videos = Video.query.all()
         ret = self.video_schema.dump(videos, many=True)
-        return ret, 200
+        return ret, http.HTTPStatus.OK
 
     def post(self):
         data = request.get_json()
         video_data = self.convert_timestamp_info(data)
-        video = self.video_schema.load(video_data)
+        video = mash_load_validate(self.video_schema, video_data)
         ret = self.video_schema.dump(video.save())
-        return ret, 201
+        return ret, http.HTTPStatus.CREATED
 
     @staticmethod
     def convert_timestamp_info(data):
@@ -68,23 +70,25 @@ class VideoList(Resource):
 
         pathlib.Path(storage_dir).mkdir(parents=True, exist_ok=True)
 
-        for video in videos:
-            video_num = video.get('num')
-            video_name = video.get('name')
-            video_upload_path = os.path.join(upload_path, video_num)
-            video_storage_path = os.path.join(storage_dir, video_name)      
-            shutil.move(video_upload_path, video_storage_path)
-            video['file_path'] = os.path.join(title, video_name)
-            del video['num']
+        if videos:
+            for video in videos:
+                video_num = video.get('num')
+                video_name = video.get('name')
+                video_upload_path = os.path.join(upload_path, video_num)
+                video_storage_path = os.path.join(storage_dir, video_name)      
+                shutil.move(video_upload_path, video_storage_path)
+                video['file_path'] = os.path.join(title, video_name)
+                del video['num']
 
-        for image in images:
-            image_num = image.get('num')
-            image_name = image.get('name')
-            image_upload_path = os.path.join(upload_path, image_num)
-            image_storage_path = os.path.join(storage_dir, image_name)
-            shutil.move(image_upload_path, image_storage_path)
-            image['file_path'] = os.path.join(title, image_name)
-            del image['num']
+        if images:
+            for image in images:
+                image_num = image.get('num')
+                image_name = image.get('name')
+                image_upload_path = os.path.join(upload_path, image_num)
+                image_storage_path = os.path.join(storage_dir, image_name)
+                shutil.move(image_upload_path, image_storage_path)
+                image['file_path'] = os.path.join(title, image_name)
+                del image['num']
 
         return data
 
@@ -103,7 +107,7 @@ class UploadFiles(Resource):
                     break
                 f.write(chunk)
         print(filename)
-        return {'timestamp': filename}, 200
+        return {'timestamp': filename}, http.HTTPStatus.CREATED
 
 
 video_api.add_resource(VideoItem, '/api/video/<int:id>')
