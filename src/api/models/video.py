@@ -1,5 +1,5 @@
 from api.utils.database import db
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow_sqlalchemy import fields as sqlma_fields
 from marshmallow import fields
 from .file import VideoFileSchema, ImageFileSchema

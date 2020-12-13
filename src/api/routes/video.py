@@ -45,8 +45,8 @@ class VideoList(Resource):
 
     def get(self):
         videos = Video.query.all()
-        result = self.video_schema.dumps(videos, many=True)
-        return result, 200
+        ret = self.video_schema.dump(videos, many=True)
+        return ret, 200
 
     def post(self):
         data = request.get_json()

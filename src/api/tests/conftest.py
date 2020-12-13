@@ -16,7 +16,6 @@ def app():
     app_config.UPLOAD_FOLDER = tempfile.mkdtemp()
     app_config.FILE_STORAGE_PATH = tempfile.mkdtemp()
     app = create_app(app_config)
-    client = app.test_client()
 
     yield app
 

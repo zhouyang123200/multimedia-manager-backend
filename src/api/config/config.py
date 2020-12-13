@@ -14,7 +14,7 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///../database.db'
-    FILE_STORAGE_PATH = '/home/zhouyang/mediadata'
+    FILE_STORAGE_PATH = '/mnt/mediadata'
 
 
 class TestConfig(Config):
