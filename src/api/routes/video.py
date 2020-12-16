@@ -6,7 +6,7 @@ import http
 import time
 from flask import Blueprint, request, current_app
 from flask_restful import Api, Resource
-from api.models import VideoSchema, Video
+from api.models import VideoSchema, VideoRawSchema, Video
 from api.utils.request_validate import mash_load_validate
 
 video_route = Blueprint('video_route', __name__)
@@ -44,6 +44,7 @@ class VideoItem(Resource):
 class VideoList(Resource):
 
     video_schema = VideoSchema()
+    raw_video_schema = VideoRawSchema()
 
     def get(self):
         videos = Video.query.all()
@@ -52,6 +53,7 @@ class VideoList(Resource):
 
     def post(self):
         data = request.get_json()
+        data = mash_load_validate(self.raw_video_schema, data)
         video_data = self.convert_timestamp_info(data)
         video = mash_load_validate(self.video_schema, video_data)
         ret = self.video_schema.dump(video.save())

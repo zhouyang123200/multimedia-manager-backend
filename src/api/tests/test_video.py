@@ -20,16 +20,16 @@ def test_post_video(app, shared_datadir):
     """
     test_uri = '/api/videos'
     video_src = os.path.join(shared_datadir, 'sample.mp4')
-    video_dst = os.path.join(app.config['UPLOAD_FOLDER'], '12345')
+    video_dst = os.path.join(app.config['UPLOAD_FOLDER'], '1608130297.1875458')
     copyfile(video_src, video_dst)
     image_src = os.path.join(shared_datadir, 'sample.jpg')
-    image_dst = os.path.join(app.config['UPLOAD_FOLDER'], '56789')
+    image_dst = os.path.join(app.config['UPLOAD_FOLDER'], '1608130297.1875459')
     copyfile(image_src, image_dst)
     rv = app.test_client().post(test_uri, json={
         "title": 'test_video',
         'description': 'test video',
-        'video_files': [{'num': '12345', 'name': 'test_video.mp4'}],
-        'image_files': [{'num': '56789', 'name': 'test_image.jpg'}]
+        'video_files': [{'num': '1608130297.1875458', 'name': 'test_video.mp4'}],
+        'image_files': [{'num': '1608130297.1875459', 'name': 'test_image.jpg'}]
     })
     data = json.loads(rv.data)
     assert 'test_video' == data.get('title')
