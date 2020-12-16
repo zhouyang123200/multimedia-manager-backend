@@ -1,7 +1,7 @@
 from api.utils.database import db
 from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow_sqlalchemy import fields as sqlma_fields
-from marshmallow import fields
+from marshmallow import fields, Schema, validates, ValidationError
 from .file import VideoFileSchema, ImageFileSchema
 
 class Video(db.Model):
@@ -39,3 +39,23 @@ class VideoSchema(SQLAlchemySchema):
     video_files = sqlma_fields.Nested(VideoFileSchema, many=True, exclude=("id", "created"))
     image_files = sqlma_fields.Nested(ImageFileSchema, many=True, exclude=("id", "created"))
     description = fields.String(required=True)
+
+
+class RawFileSchema(Schema):
+
+    name = fields.String()
+    num = fields.String()
+
+    @validates('num')
+    def verify_timestamp(self, value):
+        if len(value) != 18 or value[10] != '.':
+            raise ValidationError('This is not a timestamp!')
+
+class VideoRawSchema(Schema):
+
+    title = fields.String(required=True)
+    video_files = fields.List(fields.Nested(RawFileSchema))
+    image_files = fields.List(fields.Nested(RawFileSchema))
+    description = fields.String()
+    
+
