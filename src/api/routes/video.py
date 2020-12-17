@@ -72,25 +72,23 @@ class VideoList(Resource):
 
         pathlib.Path(storage_dir).mkdir(parents=True, exist_ok=True)
 
-        if videos:
-            for video in videos:
-                video_num = video.get('num')
-                video_name = video.get('name')
-                video_upload_path = os.path.join(upload_path, video_num)
-                video_storage_path = os.path.join(storage_dir, video_name)      
-                shutil.move(video_upload_path, video_storage_path)
-                video['file_path'] = os.path.join(title, video_name)
-                del video['num']
+        for video in videos:
+            video_num = video.get('num')
+            video_name = video.get('name')
+            video_upload_path = os.path.join(upload_path, video_num)
+            video_storage_path = os.path.join(storage_dir, video_name)      
+            shutil.move(video_upload_path, video_storage_path)
+            video['file_path'] = os.path.join(title, video_name)
+            del video['num']
 
-        if images:
-            for image in images:
-                image_num = image.get('num')
-                image_name = image.get('name')
-                image_upload_path = os.path.join(upload_path, image_num)
-                image_storage_path = os.path.join(storage_dir, image_name)
-                shutil.move(image_upload_path, image_storage_path)
-                image['file_path'] = os.path.join(title, image_name)
-                del image['num']
+        for image in images:
+            image_num = image.get('num')
+            image_name = image.get('name')
+            image_upload_path = os.path.join(upload_path, image_num)
+            image_storage_path = os.path.join(storage_dir, image_name)
+            shutil.move(image_upload_path, image_storage_path)
+            image['file_path'] = os.path.join(title, image_name)
+            del image['num']
 
         return data
 
