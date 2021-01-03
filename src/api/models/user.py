@@ -14,15 +14,16 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True)
     passwd = db.Column(db.String(300))
     is_activate = db.Column(db.Boolean(), default=False)
-    createed = db.Column(db.DateTime(), nullable=True, server_default=db.func.now())
-    updated = db.Column(db.DateTime(), nullable=True, server_default=db.func.now(), onupdated=db.fun.now())
+    created_at = db.Column(db.DateTime(), nullable=True, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime(), nullable=True, server_default=db.func.now(), onupdate=db.func.now())
 
     def save(self):
         db.session.add(self)
         db.session.commit()
+        return self
 
     def __repr__(self):
-        return '<User %r>' % self.title
+        return '<User %r>' % self.username
 
     def delete(self):
         db.session.delete(self)
@@ -35,13 +36,18 @@ class User(db.Model):
 
 class UserSchema(SQLAlchemySchema):
 
+    class Meta:
+        model = User 
+        sqla_session = db.session
+        load_instance = True
+
     id = fields.Number(dump_only=True)
     username = fields.String(required=True)
     email = fields.Email(required=True)
     passwd = fields.String(required=True, deserialize='load_passwd')
     is_activate = fields.Boolean()
-    created = fields.DateTime()
-    updated = fields.DateTime()
+    created_at = fields.DateTime()
+    updated_at = fields.DateTime()
 
     def load_passwd(self, value):
         return hash_password(value)

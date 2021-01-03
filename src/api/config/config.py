@@ -4,6 +4,8 @@ class Config(object):
     HOST = '127.0.0.1'
     STATIC_URL = 'static/'
     MAX_CONTENT_LENGTH = 10000 * 1024 * 1024
+    SECRET_KEY = 'super-secret-key'
+    JWT_ERROR_MESSAGE_KEY = 'message'
 
 
 class ProductionConfig(Config):

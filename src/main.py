@@ -3,7 +3,9 @@ import pathlib
 from flask import Flask
 from api.config.config import DevelopmentConfig, ProductionConfig
 from api.utils.database import db
+from api.utils.passwd import jwt
 from api.routes.video import video_route
+from api.routes.user import user_route
 
 
 def create_app(config):
@@ -11,6 +13,7 @@ def create_app(config):
 
     app.config.from_object(config)
     init_db(app)
+    jwt.init_app(app)
     create_all_dir(app)
     register_blueprint(app)
 
@@ -29,6 +32,7 @@ def register_blueprint(app):
     register all blueprint
     """
     app.register_blueprint(video_route)
+    app.register_blueprint(user_route)
 
 def create_all_dir(app):
     pathlib.Path(app.config['UPLOAD_FOLDER']).mkdir(exist_ok=True)
