@@ -4,7 +4,7 @@ class Config(object):
     HOST = '127.0.0.1'
     STATIC_URL = 'static/'
     MAX_CONTENT_LENGTH = 10000 * 1024 * 1024
-    SECRET_KEY = 'super-secret-key'
+    SECRET_KEY = 'akAjTCGc2CRHU12R6z+eekbk8wPs3tKL'
     JWT_ERROR_MESSAGE_KEY = 'message'
 
 
