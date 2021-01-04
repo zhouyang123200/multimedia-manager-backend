@@ -18,16 +18,10 @@ jobs:
           paths:
             - "venv"
       - run:
-          name: create log directory
-          command: |
-            sudo mkdir -p /var/log/multimedia
-            sudo chown -R $USER:$USER /var/log/multimedia
-            echo "current user: `whoami`"
-      - run:
           name: excute unit test
           command:  |
-            echo "current user: `whoami`"
-            echo "`ls -l /var/log`"
+            sudo mkdir -p /var/log/multimedia
+            sudo chown -R $USER:$USER /var/log/multimedia
             . venv/bin/activate
             cd src && python -m pytest
           environment:
