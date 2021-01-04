@@ -27,7 +27,7 @@ jobs:
           name: excute unit test
           command:  |
             echo "current user: `whoami`"
-            echo "`ls -l /var/log/multimedia`"
+            echo "`ls -l /var/log`"
             . venv/bin/activate
             cd src && python -m pytest
           environment:
