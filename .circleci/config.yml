@@ -21,7 +21,9 @@ jobs:
           name: excute unit test
           command:  |
             sudo mkdir -p /var/log/multimedia
+            echo "user: `whoami`"
             sudo chown -R $USER:$USER /var/log/multimedia
+            echo "user: `whoami`"
             . venv/bin/activate
             cd src && python -m pytest
           environment:
