@@ -35,6 +35,7 @@ class UserList(Resource):
         user = mash_load_validate(self.user_schema, data)
         ret = UserSchema(exclude=('created_at', 'updated_at', 'is_activate')).dump(user.save())
         ret['access_token'] = create_access_token(identity=user.id)
+        current_app.logger.info('user %s created successfully', user.username)
         return ret, HTTPStatus.CREATED
 
 class TokenResource(Resource):

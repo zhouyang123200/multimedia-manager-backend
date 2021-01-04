@@ -1,5 +1,7 @@
 import os
 import pathlib
+import logging
+from logging.handlers import RotatingFileHandler
 from flask import Flask
 from api.config.config import DevelopmentConfig, ProductionConfig
 from api.utils.database import db
@@ -16,6 +18,7 @@ def create_app(config):
     jwt.init_app(app)
     create_all_dir(app)
     register_blueprint(app)
+    setup_log(app)
 
     return app
 
@@ -37,4 +40,9 @@ def register_blueprint(app):
 def create_all_dir(app):
     pathlib.Path(app.config['UPLOAD_FOLDER']).mkdir(exist_ok=True)
     pathlib.Path(app.config['FILE_STORAGE_PATH']).mkdir(exist_ok=True)
+
+def setup_log(app):
+    handler = RotatingFileHandler(app.config['LOG_FILE'], maxBytes=10000, backupCount=1)
+    handler.setLevel(app.config['LOG_LEVEL'])
+    app.logger.addHandler(handler)
 
