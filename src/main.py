@@ -44,5 +44,8 @@ def create_all_dir(app):
 def setup_log(app):
     handler = RotatingFileHandler(app.config['LOG_FILE'], maxBytes=10000, backupCount=1)
     handler.setLevel(app.config['LOG_LEVEL'])
+    handler.setFormatter(logging.Formatter(
+        '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+    ))
     app.logger.addHandler(handler)
 
