@@ -22,9 +22,11 @@ jobs:
           command: |
             sudo mkdir -p /var/log/multimedia
             sudo chown -R $USER:$USER /var/log/multimedia
+            echo "current user: `whoami`"
       - run:
           name: excute unit test
           command:  |
+            echo "current user: `whoami`"
             . venv/bin/activate
             cd src && python -m pytest
           environment:
