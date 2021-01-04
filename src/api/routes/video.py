@@ -38,6 +38,7 @@ class VideoItem(Resource):
         video = Video.query.get(id)
         if video:
             video.delete()
+            current_app.logger.warning('video %s delete successfully', video.title)
         return {}, http.HTTPStatus.NO_CONTENT
 
 
@@ -57,6 +58,7 @@ class VideoList(Resource):
         video_data = self.convert_timestamp_info(data)
         video = mash_load_validate(self.video_schema, video_data)
         ret = self.video_schema.dump(video.save())
+        current_app.logger.info('video %s created successfully', video.title)
         return ret, http.HTTPStatus.CREATED
 
     @staticmethod
@@ -106,7 +108,7 @@ class UploadFiles(Resource):
                 if len(chunk) == 0:
                     break
                 f.write(chunk)
-        print(filename)
+        current_app.logger.info('file %s upload successfully', filename)
         return {'timestamp': filename}, http.HTTPStatus.CREATED
 
 

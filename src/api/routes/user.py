@@ -46,6 +46,7 @@ class TokenResource(Resource):
         if not user_find_by_name or not \
         check_password(data.get('passwd'), user_find_by_name.passwd):
             return {'message': 'username or password is incorrect'}, HTTPStatus.UNAUTHORIZED
+        current_app.logger.info('user %s login', user_find_by_name.username)
         return {'access_token': create_access_token(identity=user_find_by_name.id, fresh=True)}
 
 
