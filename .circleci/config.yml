@@ -21,7 +21,7 @@ jobs:
           name: create log directory
           command: |
             sudo mkdir -p /var/log/multimedia
-            chown -R $USER:$USER /var/log/multimedia
+            sudo chown -R $USER:$USER /var/log/multimedia
       - run:
           name: excute unit test
           command:  |
