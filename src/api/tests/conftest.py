@@ -22,12 +22,14 @@ def app():
     app_config.SQLALCHEMY_DATABASE_URI = 'sqlite:///' + db_path
     app_config.UPLOAD_FOLDER = tempfile.mkdtemp()
     app_config.FILE_STORAGE_PATH = tempfile.mkdtemp()
-    app_config.LOG_FILE = tempfile.mkdtemp()
+    log_fd, log_path = tempfile.mkstemp()
+    app_config.LOG_FILE = log_path
     app = create_app(app_config)
 
     yield app
 
     os.close(db_fd)
+    os.close(log_fd)
     os.unlink(db_path)
     shutil.rmtree(app_config.UPLOAD_FOLDER)
     shutil.rmtree(app_config.FILE_STORAGE_PATH)
