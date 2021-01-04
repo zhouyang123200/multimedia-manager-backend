@@ -22,8 +22,10 @@ jobs:
           command:  |
             sudo mkdir -p /var/log/multimedia
             echo "user: `whoami`"
+            echo "ls -l /var/log/multimedia"
             sudo chown -R $USER:$USER /var/log/multimedia
             echo "user: `whoami`"
+            echo "ls -l /var/log/multimedia"
             . venv/bin/activate
             cd src && python -m pytest
           environment:
