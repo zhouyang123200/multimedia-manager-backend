@@ -18,6 +18,11 @@ jobs:
           paths:
             - "venv"
       - run:
+          name: create log directory
+          command: |
+            sudo mkdir -p /var/log/multimedia
+            chown -R $USER:$USER /var/log/multimedia
+      - run:
           name: excute unit test
           command:  |
             . venv/bin/activate
