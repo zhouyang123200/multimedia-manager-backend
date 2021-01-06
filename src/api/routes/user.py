@@ -1,13 +1,21 @@
 from http import HTTPStatus
 from flask import Blueprint, request, current_app
 from flask_restful import Api, Resource
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_optional
+from flask_jwt_extended import (
+    create_access_token,
+    get_jwt_identity,
+    jwt_optional,
+    jwt_required,
+    get_raw_jwt
+    )
 from api.models import User, UserSchema
 from api.utils.request_validate import mash_load_validate
 from api.utils.passwd import check_password
 
 user_route = Blueprint('user_route', __name__)
 user_api = Api(user_route)
+
+black_list = set()
 
 class UserItem(Resource):
 
@@ -50,6 +58,16 @@ class TokenResource(Resource):
         return {'access_token': create_access_token(identity=user_find_by_name.id, fresh=True)}
 
 
+class RevokeResourse(Resource):
+
+    @jwt_required
+    def post(self):
+        jti = get_raw_jwt()['jti']
+        black_list.add(jti)
+        return {'message': 'Successfully logged out'}, HTTPStatus.OK
+
+
 user_api.add_resource(UserList, '/api/users')
 user_api.add_resource(TokenResource, '/api/token')
+user_api.add_resource(RevokeResourse, '/api/revoke')
 

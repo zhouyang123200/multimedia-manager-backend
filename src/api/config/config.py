@@ -8,6 +8,8 @@ class Config(object):
     MAX_CONTENT_LENGTH = 10000 * 1024 * 1024
     SECRET_KEY = 'akAjTCGc2CRHU12R6z+eekbk8wPs3tKL'
     JWT_ERROR_MESSAGE_KEY = 'message'
+    JWT_BLACKLIST_ENABLED = True
+    JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     LOG_FILE = '/home/zhouyang/log/app.log'
     LOG_LEVEL = logging.INFO
 

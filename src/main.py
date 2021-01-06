@@ -7,7 +7,7 @@ from api.config.config import DevelopmentConfig, ProductionConfig
 from api.utils.database import db
 from api.utils.passwd import jwt
 from api.routes.video import video_route
-from api.routes.user import user_route
+from api.routes.user import user_route, black_list
 
 
 def create_app(config):
@@ -15,7 +15,7 @@ def create_app(config):
 
     app.config.from_object(config)
     init_db(app)
-    jwt.init_app(app)
+    jwt_setup(app)
     create_all_dir(app)
     register_blueprint(app)
     setup_log(app)
@@ -49,3 +49,9 @@ def setup_log(app):
     ))
     app.logger.addHandler(handler)
 
+def jwt_setup(app):
+    jwt.init_app(app)
+    @jwt.token_in_blacklist_loader
+    def check_if_token_in_blacklist(decrypted_token):
+        jti = decrypted_token['jti']
+        return jti in black_list
