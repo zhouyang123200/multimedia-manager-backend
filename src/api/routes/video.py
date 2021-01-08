@@ -6,7 +6,10 @@ import http
 import time
 from flask import Blueprint, request, current_app
 from flask_restful import Api, Resource
-from api.models import VideoSchema, VideoRawSchema, Video
+from sqlalchemy import desc
+from webargs import fields
+from webargs.flaskparser import use_kwargs
+from api.models import VideoSchema, VideoRawSchema, Video, VideoPaginationSchema
 from api.utils.request_validate import mash_load_validate
 
 video_route = Blueprint('video_route', __name__)
@@ -45,11 +48,14 @@ class VideoItem(Resource):
 class VideoList(Resource):
 
     video_schema = VideoSchema()
+    video_pagenation_schema = VideoPaginationSchema()
     raw_video_schema = VideoRawSchema()
 
-    def get(self):
-        videos = Video.query.all()
-        ret = self.video_schema.dump(videos, many=True)
+    @use_kwargs({'page': fields.Int(missing=1),
+                           'per_page': fields.Int(missing=20)})
+    def get(self, page, per_page):
+        videos = Video.query.order_by(desc(Video.created_at)).paginate(page=page, per_page=per_page)
+        ret = self.video_pagenation_schema.dump(videos)
         return ret, http.HTTPStatus.OK
 
     def post(self):

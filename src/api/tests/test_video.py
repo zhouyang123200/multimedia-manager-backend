@@ -41,21 +41,29 @@ def test_get_videos(app, shared_datadir):
     """
 
     test_uri = '/api/videos'
-    video_title = 'video_one'
+    video_title = 'video'
     video_one_filepath = os.path.join(app.config['FILE_STORAGE_PATH'], video_title)
     video_schema = VideoSchema()
-    video_one = video_schema.load({
+    video_data = {
         'title': video_title,
         'video_files': [{'name': 'video_file_one', 'file_path': os.path.join(video_title, 'video_file_one')}],
         'image_files': [{'name': 'image_file_one', 'file_path': os.path.join(video_title, 'image_file_one')}],
         'description': 'test video description.'
-    })
+    }
+
     with app.app_context():
-        db.session.add(video_one)
-        db.session.commit()
+        for num in range(10):
+            data = video_data.copy()
+            data['title'] = data['title'] + "_" + str(num)
+            data['video_files'][0]['file_path'] =  data['video_files'][0]['file_path'] + '_' + str(num)
+            data['image_files'][0]['file_path'] = data['image_files'][0]['file_path'] + '_' + str(num)
+            video_obj = video_schema.load(data)
+            db.session.add(video_obj)
+            db.session.commit()
     rv = app.test_client().get(test_uri)
     ret = json.loads(rv.data)
-    assert video_title == ret[0].get('title')
+    # assert video_title == ret[0].get('title')
+    assert 'data' in ret
 
 
 
