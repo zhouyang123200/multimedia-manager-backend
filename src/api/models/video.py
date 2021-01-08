@@ -1,4 +1,5 @@
 from api.utils.database import db
+from api.utils.paginator import PaginationSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow_sqlalchemy import fields as sqlma_fields
 from marshmallow import fields, Schema, validates, ValidationError
@@ -12,6 +13,7 @@ class Video(db.Model):
     title = db.Column(db.String(120), unique=True, nullable=True)
     video_files = db.relationship('VideoFile', backref=db.backref('video'), lazy=False)
     image_files = db.relationship('ImageFile', backref=db.backref('video'), lazy=False)
+    created_at = db.Column(db.DateTime(), nullable=True, server_default=db.func.now())
     description = db.Column(db.String(120))
 
     def save(self):
@@ -38,7 +40,12 @@ class VideoSchema(SQLAlchemySchema):
     title = fields.String(required=True)
     video_files = sqlma_fields.Nested(VideoFileSchema, many=True, exclude=("id", "created"))
     image_files = sqlma_fields.Nested(ImageFileSchema, many=True, exclude=("id", "created"))
+    created_at = fields.DateTime(dump_only=True)
     description = fields.String(required=True)
+
+
+class VideoPaginationSchema(PaginationSchema):
+    data = fields.Nested(VideoSchema, attribute='items', many=True)
 
 
 class RawFileSchema(Schema):
