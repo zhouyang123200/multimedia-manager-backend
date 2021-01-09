@@ -52,9 +52,13 @@ class VideoList(Resource):
     raw_video_schema = VideoRawSchema()
 
     @use_kwargs({'page': fields.Int(missing=1),
-                           'per_page': fields.Int(missing=20)})
-    def get(self, page, per_page):
-        videos = Video.query.order_by(desc(Video.created_at)).paginate(page=page, per_page=per_page)
+                            'query': fields.Str(missing=''),
+                           'per_page': fields.Int(missing=5)}, location='query')
+    def get(self, query, page, per_page):
+        keyword = f'%{query}%'
+        videos = Video.query.filter(Video.title.ilike(keyword)).\
+            order_by(desc(Video.created_at)).\
+            paginate(page=page, per_page=per_page)
         ret = self.video_pagenation_schema.dump(videos)
         return ret, http.HTTPStatus.OK
 
