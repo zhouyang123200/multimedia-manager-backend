@@ -2,6 +2,8 @@ import os
 import json
 import pathlib
 from shutil import copyfile
+from http import HTTPStatus
+from urllib.parse import urlencode
 from api.models.video import VideoSchema
 from api.utils.database import db
 
@@ -59,11 +61,15 @@ def test_get_videos(app, shared_datadir):
             data['image_files'][0]['file_path'] = data['image_files'][0]['file_path'] + '_' + str(num)
             video_obj = video_schema.load(data)
             db.session.add(video_obj)
-            db.session.commit()
-    rv = app.test_client().get(test_uri)
+        db.session.commit()
+    test_uri_with_args = test_uri + "?" + urlencode({'page': 1, 'per_page': 2})
+    rv = app.test_client().get(test_uri_with_args)
     ret = json.loads(rv.data)
-    # assert video_title == ret[0].get('title')
+    assert rv.status_code == HTTPStatus.OK
     assert 'data' in ret
+    assert 5 == ret.get('pages')
+    assert ret.get('links').get('next') == 'http://localhost' + test_uri + '?' + urlencode({'page': 2, 'per_page': 2})
+
 
 
 
