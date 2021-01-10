@@ -26,3 +26,16 @@ jobs:
             WORK_ENV: TEST
       - store_test_results:
           path: test-results
+      - run:
+          name: build image
+          command: |
+            docker build -t multimedia-manager-backend .
+      - run:
+          name: save docker image
+          command: |
+            mkdir -p ./caches
+            docker save -o ./caches/multimedia-manager-backend.tar multimedia-manager-backend
+      - save_cache:
+        key: v1-{{ .Branch }}-{{ epoch }}
+        paths:
+          - ./caches/multimedia-manager-backend.tar
