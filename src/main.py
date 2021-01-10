@@ -38,10 +38,16 @@ def register_blueprint(app):
     app.register_blueprint(user_route)
 
 def create_all_dir(app):
+    """
+    create all direactory in init step
+    """
     pathlib.Path(app.config['UPLOAD_FOLDER']).mkdir(exist_ok=True)
     pathlib.Path(app.config['FILE_STORAGE_PATH']).mkdir(exist_ok=True)
 
 def setup_log(app):
+    """
+    setup log configure
+    """
     handler = RotatingFileHandler(app.config['LOG_FILE'], maxBytes=10000, backupCount=1)
     handler.setLevel(app.config['LOG_LEVEL'])
     handler.setFormatter(logging.Formatter(
@@ -50,6 +56,9 @@ def setup_log(app):
     app.logger.addHandler(handler)
 
 def jwt_setup(app):
+    """
+    setup jwt configure
+    """
     jwt.init_app(app)
     @jwt.token_in_blacklist_loader
     def check_if_token_in_blacklist(decrypted_token):

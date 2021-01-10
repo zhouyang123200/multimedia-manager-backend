@@ -5,6 +5,7 @@ jobs:
       - image: circleci/python:3.7.5
     steps:
       - checkout
+      - setup_remote_docker
       - restore_cache:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
       - run:
@@ -26,3 +27,14 @@ jobs:
             WORK_ENV: TEST
       - store_test_results:
           path: test-results
+      - run:
+          name: build image
+          command: |
+            docker build -t multimedia-manager-backend .
+      - run:
+          name: save docker image
+          command: |
+            mkdir -p ./caches
+            docker save -o ./caches/multimedia-manager-backend.tar multimedia-manager-backend
+      - store_artifacts:
+          path: ./caches/multimedia-manager-backend.tar 
