@@ -48,3 +48,10 @@ workflows:
   only_build:
     jobs:
       - build
+      - hold:
+          type: approval
+          requires:
+            - build
+      - make_artifacts:
+          requires:
+            - hold
