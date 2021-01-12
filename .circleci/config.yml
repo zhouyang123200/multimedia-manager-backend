@@ -62,7 +62,7 @@ jobs:
           name: Publish Docker Image to Docker Hub
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            docker push multimedia-manager-backend:latest
+            docker push $DOCKERHUB_USERNAME/multimedia-manager-backend:latest
 workflows:
   only_build:
     jobs:
