@@ -71,11 +71,11 @@ workflows:
           requires:
             - build
           filters:
-            branchs:
+            branche:
               only: master
       - publish-latest:
           requires:
             - make_artifacts
           filters:
-            branchs:
+            branches:
               only: master
