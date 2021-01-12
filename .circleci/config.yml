@@ -46,7 +46,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - ./multimedia-manager-backend.tar
+            - ./caches/multimedia-manager-backend.tar
       - store_artifacts:
           path: ./caches/multimedia-manager-backend.tar
   publish-latest:
