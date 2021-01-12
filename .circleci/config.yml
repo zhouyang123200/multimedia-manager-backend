@@ -57,7 +57,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Load archived Docker image
-          command: docker load -i /tmp/workspace/multimedia-manager-backend.tar
+          command: docker load -i /tmp/workspace/caches/multimedia-manager-backend.tar
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
