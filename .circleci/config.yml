@@ -71,7 +71,7 @@ workflows:
           requires:
             - build
           filters:
-            branche:
+            branches:
               only: master
       - publish-latest:
           requires:
