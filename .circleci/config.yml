@@ -1,11 +1,8 @@
 version: 2.1
-executors:
-  docker-builder:
-    docker:
-      - image: circleci/python:3.7.5
 jobs:
   build:
-    executor: docker-builder
+    docker:
+      - image: circleci/python:3.7.5
     steps:
       - checkout
       - restore_cache:
@@ -30,52 +27,31 @@ jobs:
       - store_test_results:
           path: test-results
   make_artifacts:
-    executor: docker-builder
+    docker:
+      - image: circleci/python:3.7.5
     steps:
       - checkout
       - setup_remote_docker
       - run:
           name: build image
           command: |
-            docker build -t multimedia-manager-backend:latest .
+            docker build -t multimedia-manager-backend .
       - run:
           name: save docker image
           command: |
             mkdir -p ./caches
             docker save -o ./caches/multimedia-manager-backend.tar multimedia-manager-backend
-      - persist_to_workspace:
-          root: .
-          paths:
-            - ./multimedia-manager-backend.tar
       - store_artifacts:
           path: ./caches/multimedia-manager-backend.tar
-  publish-latest:
-    executor: docker-builder
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - setup_remote_docker
-      - run:
-          name: Load archived Docker image
-          command: docker load -i /tmp/workspace/multimedia-manager-backend.tar
-      - run:
-          name: Publish Docker Image to Docker Hub
-          command: |
-            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            docker push multimedia-manager-backend:latest
+
 workflows:
   only_build:
     jobs:
       - build
-      - make_artifacts:
+      - hold:
+          type: approval
           requires:
             - build
-          filters:
-            branches:
-              only: master
-      - publish-latest:
+      - make_artifacts:
           requires:
-            - make_artifacts
-          filters:
-            branches:
-              only: master
+            - hold
