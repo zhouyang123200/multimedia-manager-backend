@@ -3,6 +3,8 @@ import pathlib
 import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask
+from flask_mail import Mail
+from werkzeug.routing import BaseConverter 
 from api.config.config import DevelopmentConfig, ProductionConfig
 from api.utils.database import db
 from api.utils.passwd import jwt
@@ -17,8 +19,10 @@ def create_app(config):
     init_db(app)
     jwt_setup(app)
     create_all_dir(app)
+    create_regex(app)
     register_blueprint(app)
     setup_log(app)
+    mail_setup(app)
 
     return app
 
@@ -64,3 +68,22 @@ def jwt_setup(app):
     def check_if_token_in_blacklist(decrypted_token):
         jti = decrypted_token['jti']
         return jti in black_list
+
+def mail_setup(app):
+    """
+    init flask mail
+    """
+    mail = Mail()
+    mail.init_app(app)
+    app.mail = mail
+
+def create_regex(app):
+    """
+    let flask url support regex
+    """
+    class RegexConverter(BaseConverter):
+        def __init__(self, map, *args):
+            self.map = map
+            self.regex = args[0]
+
+    app.url_map.converters['regex'] = RegexConverter
