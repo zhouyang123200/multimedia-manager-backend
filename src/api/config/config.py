@@ -25,6 +25,11 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///../database.db'
     FILE_STORAGE_PATH = '/mnt/mediadata'
+    MAIL_SERVER = ''
+    MAIL_PORT = 25 
+    MAIL_USERNAME = ''
+    MAIL_PASSWORD = '' 
+    MAIL_SUPPRESS_SEND = True
 
 
 class TestConfig(Config):

@@ -1,12 +1,16 @@
 import json
+from http import HTTPStatus
+from flask import url_for
 from api.models import User, UserSchema
 from api.utils.database import db
 from api.routes.user import black_list
+from api.utils.passwd import generate_token, verify_token
 
 USERDATA = {
     'username': 'user1',
     'passwd': 'admin123',
-    'email': 'user1@test.com'
+    'email': 'user1@test.com',
+    'is_activate': True
 }
 
 def create_user(app):
@@ -17,11 +21,13 @@ def create_user(app):
 
 def test_post_user(app):
     test_uri = '/api/users'
-    response = app.test_client().post(test_uri, json=USERDATA)
+    with app.mail.record_messages() as outbox:
+        response = app.test_client().post(test_uri, json=USERDATA)
+        assert len(outbox) == 1
+        assert outbox[0].subject == 'Please confirm your registration'
     data = json.loads(response.data)
-    assert 'user1' == data.get('username')
-    assert 'user1@test.com' == data.get('email')
-    assert 'access_token' in data
+    assert USERDATA.get('username') == data.get('username')
+    assert USERDATA.get('email') == data.get('email')
 
 def test_post_token(app):
     test_uri = '/api/token'
@@ -37,6 +43,17 @@ def test_post_token(app):
     responses = client.post(test_uri, headers={'Authorization': 'Bearer {}'.format(data['access_token'])})
     assert responses.status_code == 401
 
+def test_activate_user(app):
+    test_uri = '/api/user/activate/{}'
+    user = create_user(app)
+    with app.app_context():
+        token = generate_token(email=USERDATA.get('email'), salt='activate')
+        user.is_activate = False
+        user.save()
+    with app.test_request_context():
+        test_uri = url_for('user_route.useractivateresource', token=token, _external=False)
+    response = app.test_client().get(test_uri)
+    assert response.status_code == HTTPStatus.NO_CONTENT
 
 def test_get_usersporfile(app):
     pass
