@@ -44,12 +44,15 @@ def test_post_token(app):
     assert responses.status_code == 401
 
 def test_activate_user(app):
-    test_uri = '/api/user/activate/{}'
     user = create_user(app)
     with app.app_context():
         token = generate_token(email=USERDATA.get('email'), salt='activate')
         user.is_activate = False
         user.save()
+    with app.test_request_context():
+        test_uri = url_for('user_route.tokenresource', _external=False)
+    response = app.test_client().post(test_uri, json=USERDATA)
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     with app.test_request_context():
         test_uri = url_for('user_route.useractivateresource', token=token, _external=False)
     response = app.test_client().get(test_uri)
