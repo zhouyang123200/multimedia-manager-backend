@@ -52,6 +52,7 @@ class UserList(Resource):
         current_app.logger.info('user %s send activate email successfully', user.username)
         return ret, HTTPStatus.CREATED
 
+
 class TokenResource(Resource):
 
     def post(self):
@@ -60,11 +61,13 @@ class TokenResource(Resource):
         if not user_find_by_name or not \
         check_password(data.get('passwd'), user_find_by_name.passwd):
             return {'message': 'username or password is incorrect'}, HTTPStatus.UNAUTHORIZED
+        if not user_find_by_name.is_activate:
+            return {'message': 'the user is not activate'}, HTTPStatus.BAD_REQUEST
         current_app.logger.info('user %s login', user_find_by_name.username)
         return {'access_token': create_access_token(identity=user_find_by_name.id, fresh=True)}
 
 
-class RevokeResourse(Resource):
+class RevokeResource(Resource):
 
     @jwt_required
     def post(self):
@@ -89,7 +92,6 @@ class UserActivateResource(Resource):
         return {}, HTTPStatus.NO_CONTENT
 
 
-
 class MailResource(Resource):
 
     def post(self):
@@ -103,7 +105,7 @@ class MailResource(Resource):
 
 user_api.add_resource(UserList, '/api/users')
 user_api.add_resource(TokenResource, '/api/token')
-user_api.add_resource(RevokeResourse, '/api/revoke')
+user_api.add_resource(RevokeResource, '/api/revoke')
 user_api.add_resource(MailResource, '/api/testmail')
 user_api.add_resource(UserActivateResource, '/api/users/activate/<regex("[a-zA-Z.0-9-_]+"):token>')
 
