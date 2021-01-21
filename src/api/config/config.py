@@ -30,6 +30,8 @@ class DevelopmentConfig(Config):
     MAIL_USERNAME = ''
     MAIL_PASSWORD = '' 
     MAIL_SUPPRESS_SEND = True
+    CELERY_BROKER_URL = "pyamqp://localhost//" 
+    CELERY_RESULT_BACKEND = "pyamqp://localhost//" 
 
 
 class TestConfig(Config):
