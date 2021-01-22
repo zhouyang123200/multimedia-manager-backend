@@ -4,12 +4,11 @@ import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_mail import Mail
-from flask_celery import Celery
 from werkzeug.routing import BaseConverter 
 from api.config.config import DevelopmentConfig, ProductionConfig
 from api.utils.database import db
 from api.utils.passwd import jwt
-from api.utils.extensions import celery
+from api.utils.tasks import celery
 from api.routes.video import video_route
 from api.routes.user import user_route, black_list
 
@@ -91,10 +90,24 @@ def create_regex(app):
 
     app.url_map.converters['regex'] = RegexConverter
 
-def celery_setup(app):
+def make_celery(app):
+
+    celery.conf.broker_url = app.config['CELERY_BROKER_URL']
+    celery.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
+
+def celery_setup(flask_app):
     """
     init celery app
     """
-    app.config['CELERY_IMPORTS'] = ('tasks.add_together',)
-    celery.init_app(app)
-    
+    celery = make_celery(flask_app)
+    celery.finalize()
+    flask_app.celery = celery

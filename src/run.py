@@ -11,6 +11,7 @@ elif os.environ.get('WORK_ENV') == 'TEST':
 else:
     app = create_app(DevelopmentConfig)
 
+celery = app.celery
 
 if __name__ == "__main__":
     app.run()

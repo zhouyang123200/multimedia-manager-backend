@@ -12,7 +12,6 @@ from flask_jwt_extended import (
 from api.models import User, UserSchema
 from api.utils.request_validate import mash_load_validate
 from api.utils.passwd import check_password, verify_token, generate_token
-from api.utils.tasks import add_together
 
 user_route = Blueprint('user_route', __name__)
 user_api = Api(user_route)
@@ -50,8 +49,6 @@ class UserList(Resource):
         msg = Message(subject, sender='zhouyang123200@sina.com', recipients=[user.email], body=text)
         current_app.mail.send(msg)
         current_app.logger.info('user %s send activate email successfully', user.username)
-        result = add_together.delay(10, 10)
-        ret['result'] = result.get(timeout=1)
         return ret, HTTPStatus.CREATED
 
 

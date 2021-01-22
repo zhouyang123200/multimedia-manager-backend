@@ -1,7 +1,8 @@
-from flask import current_app
-from .extensions import celery
+from celery import Celery
 
+celery = Celery(__name__)
 
 @celery.task()
 def add_together(a, b):
     return a + b
+
