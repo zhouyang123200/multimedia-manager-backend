@@ -8,6 +8,7 @@ from werkzeug.routing import BaseConverter
 from api.config.config import DevelopmentConfig, ProductionConfig
 from api.utils.database import db
 from api.utils.passwd import jwt
+from api.utils.tasks import celery
 from api.routes.video import video_route
 from api.routes.user import user_route, black_list
 
@@ -23,6 +24,7 @@ def create_app(config):
     register_blueprint(app)
     setup_log(app)
     mail_setup(app)
+    celery_setup(app)
 
     return app
 
@@ -87,3 +89,25 @@ def create_regex(app):
             self.regex = args[0]
 
     app.url_map.converters['regex'] = RegexConverter
+
+def make_celery(app):
+
+    celery.conf.broker_url = app.config['CELERY_BROKER_URL']
+    celery.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
+
+def celery_setup(flask_app):
+    """
+    init celery app
+    """
+    celery = make_celery(flask_app)
+    celery.finalize()
+    flask_app.celery = celery

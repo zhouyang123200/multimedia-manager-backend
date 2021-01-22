@@ -34,7 +34,6 @@ class UserItem(Resource):
         return ret, HTTPStatus.OK
         
 
-
 class UserList(Resource):
 
     user_schema = UserSchema()
@@ -46,7 +45,7 @@ class UserList(Resource):
         token = generate_token(user.email, salt='activate')
         subject = 'Please confirm your registration'
         link = url_for('user_route.useractivateresource', token=token, _external=True)
-        text = 'Hi, Thanks for using SmileCook! Please confirm your registration by clicking on the link: {}'.format(link)
+        text = 'Hi, Thanks for using multimedia manager! Please confirm your registration by clicking on the link: {}'.format(link)
         msg = Message(subject, sender='zhouyang123200@sina.com', recipients=[user.email], body=text)
         current_app.mail.send(msg)
         current_app.logger.info('user %s send activate email successfully', user.username)
