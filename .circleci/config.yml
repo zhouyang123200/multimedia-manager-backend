@@ -24,8 +24,8 @@ jobs:
           name: launch celery environment
           background: true
           command:  |
-            cd src
             . venv/bin/activate
+            cd src
             celery -A run.celery worker --loglevel=INFO
       - save_cache:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
