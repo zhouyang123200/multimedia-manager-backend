@@ -3,9 +3,13 @@ executors:
   docker-builder:
     docker:
       - image: circleci/python:3.7.5
+  docker-builder-rabbit:
+    docker:
+      - image: circleci/python:3.7.5
+      - image: rabbitmq
 jobs:
   build:
-    executor: docker-builder
+    executor: docker-builder-rabbit
     steps:
       - checkout
       - restore_cache:
@@ -16,6 +20,21 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
+      - run:
+          name: prepare directory
+          command: |
+            sudo chown circleci /mnt
+            sudo mkdir -p /var/log/multimedia
+            sudo chown circleci /var/log/multimedia
+      - run:
+          name: launch celery environment
+          background: true
+          command:  |
+            . venv/bin/activate
+            cd src
+            celery -A run.celery worker --loglevel=INFO
+          environment:
+            WORK_ENV: TEST
       - save_cache:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
           paths:

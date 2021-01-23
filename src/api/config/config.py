@@ -12,8 +12,8 @@ class Config(object):
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     LOG_FILE = '/home/zhouyang/log/app.log'
     LOG_LEVEL = logging.INFO
-    CELERY_BROKER_URL = "redis://localhost:6379/0" 
-    CELERY_RESULT_BACKEND = "redis://localhost:6379/0" 
+    CELERY_BROKER_URL = "amqp://localhost:5672//" 
+    CELERY_RESULT_BACKEND = "rpc://" 
 
 
 class ProductionConfig(Config):
@@ -32,8 +32,8 @@ class DevelopmentConfig(Config):
     MAIL_USERNAME = ''
     MAIL_PASSWORD = '' 
     MAIL_SUPPRESS_SEND = True
-    CELERY_BROKER_URL = "redis://localhost:6379/0" 
-    CELERY_RESULT_BACKEND = "redis://localhost:6379/0" 
+    CELERY_BROKER_URL = "amqp://localhost:5672//" 
+    CELERY_RESULT_BACKEND = "rpc://" 
 
 
 class TestConfig(Config):
