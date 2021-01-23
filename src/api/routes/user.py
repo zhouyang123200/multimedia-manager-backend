@@ -12,6 +12,7 @@ from flask_jwt_extended import (
 from api.models import User, UserSchema
 from api.utils.request_validate import mash_load_validate
 from api.utils.passwd import check_password, verify_token, generate_token
+from api.utils.tasks import send_mail
 
 user_route = Blueprint('user_route', __name__)
 user_api = Api(user_route)
@@ -47,8 +48,8 @@ class UserList(Resource):
         link = url_for('user_route.useractivateresource', token=token, _external=True)
         text = 'Hi, Thanks for using multimedia manager! Please confirm your registration by clicking on the link: {}'.format(link)
         msg = Message(subject, sender='zhouyang123200@sina.com', recipients=[user.email], body=text)
-        current_app.mail.send(msg)
-        current_app.logger.info('user %s send activate email successfully', user.username)
+        send_mail.delay(subject=subject, sender='zhouyang123200@sina.com', recipients=[user.email], text=text)
+        # current_app.logger.info('user %s send activate email successfully', user.username)
         return ret, HTTPStatus.CREATED
 
 

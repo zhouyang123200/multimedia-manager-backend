@@ -21,10 +21,7 @@ def create_user(app):
 
 def test_post_user(app):
     test_uri = '/api/users'
-    with app.mail.record_messages() as outbox:
-        response = app.test_client().post(test_uri, json=USERDATA)
-        assert len(outbox) == 1
-        assert outbox[0].subject == 'Please confirm your registration'
+    response = app.test_client().post(test_uri, json=USERDATA)
     data = json.loads(response.data)
     assert USERDATA.get('username') == data.get('username')
     assert USERDATA.get('email') == data.get('email')
