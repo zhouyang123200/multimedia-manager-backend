@@ -21,11 +21,16 @@ jobs:
             . venv/bin/activate
             pip install -r requirements.txt
       - run:
+          name: prepare directory
+          command: |
+            sudo chown circleci /mnt
+            sudo mkdir -p /var/log/multimedia
+            sudo chown circleci /var/log/multimedia
+      - run:
           name: launch celery environment
           background: true
           command:  |
             . venv/bin/activate
-            sudo chown circleci /mnt
             cd src
             celery -A run.celery worker --loglevel=INFO
           environment:
