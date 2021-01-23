@@ -6,7 +6,7 @@ executors:
   docker-builder-rabbit:
     docker:
       - image: circleci/python:3.7.5
-      - image: circleci/rabbitmq
+      - image: rabbitmq
 jobs:
   build:
     executor: docker-builder-rabbit
