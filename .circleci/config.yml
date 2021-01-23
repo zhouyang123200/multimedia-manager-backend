@@ -25,6 +25,7 @@ jobs:
           background: true
           command:  |
             . venv/bin/activate
+            sudo chown circleci /mnt
             cd src
             celery -A run.celery worker --loglevel=INFO
       - save_cache:
