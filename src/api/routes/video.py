@@ -1,6 +1,8 @@
+"""
+video apis
+"""
 import os
 import pathlib
-import json
 import shutil
 import http
 import time
@@ -17,28 +19,40 @@ video_api = Api(video_route)
 
 
 class VideoItem(Resource):
+    """
+    video rest api
+    """
 
     video_schema = VideoSchema()
     static_url = '/static/'
     media_url = '/media/'
 
-    def get(self, id):
-        video = Video.query.get(id)
+    def get(self, video_id):
+        """
+        video get api
+        """
+        video = Video.query.get(video_id)
         result = self.video_schema.dump(video)
         return result, http.HTTPStatus.OK
 
-    def put(self, id):
-        video = Video.query.get(id)
+    def put(self, vedio_id):
+        """
+        video put api
+        """
+        video = Video.query.get(vedio_id)
         data = request.get_json()
-        for key, value in video.items():
+        for key in video:
             if key in data:
                 setattr(video, key, data.get(key))
         video.save()
         result = self.video_schema.dump(video)
         return result, http.HTTPStatus.NO_CONTENT
 
-    def delete(self, id):
-        video = Video.query.get(id)
+    def delete(self, video_id):
+        """
+        video delete api
+        """
+        video = Video.query.get(video_id)
         if video:
             video.delete()
             current_app.logger.warning('video %s delete successfully', video.title)
@@ -46,6 +60,9 @@ class VideoItem(Resource):
 
 
 class VideoList(Resource):
+    """
+    video list api
+    """
 
     video_schema = VideoSchema()
     video_pagenation_schema = VideoPaginationSchema()
@@ -55,6 +72,9 @@ class VideoList(Resource):
                             'query': fields.Str(missing=''),
                            'per_page': fields.Int(missing=5)}, location='query')
     def get(self, query, page, per_page):
+        """
+        video list get api
+        """
         keyword = f'%{query}%'
         videos = Video.query.filter(Video.title.ilike(keyword)).\
             order_by(desc(Video.created_at)).\
@@ -63,6 +83,9 @@ class VideoList(Resource):
         return ret, http.HTTPStatus.OK
 
     def post(self):
+        """
+        video create api
+        """
         data = request.get_json()
         data = mash_load_validate(self.raw_video_schema, data)
         video_data = self.convert_timestamp_info(data)
@@ -73,6 +96,9 @@ class VideoList(Resource):
 
     @staticmethod
     def convert_timestamp_info(data):
+        """
+        move related file from upload file path to storage file path
+        """
         videos = data.get('video_files')
         images = data.get('image_files')
 
@@ -85,18 +111,16 @@ class VideoList(Resource):
         pathlib.Path(storage_dir).mkdir(parents=True, exist_ok=True)
 
         for video in videos:
-            video_num = video.get('num')
             video_name = video.get('name')
-            video_upload_path = os.path.join(upload_path, video_num)
-            video_storage_path = os.path.join(storage_dir, video_name)      
+            video_upload_path = os.path.join(upload_path, video.get('num'))
+            video_storage_path = os.path.join(storage_dir, video_name)
             shutil.move(video_upload_path, video_storage_path)
             video['file_path'] = os.path.join(title, video_name)
             del video['num']
 
         for image in images:
-            image_num = image.get('num')
             image_name = image.get('name')
-            image_upload_path = os.path.join(upload_path, image_num)
+            image_upload_path = os.path.join(upload_path, image.get('num'))
             image_storage_path = os.path.join(storage_dir, image_name)
             shutil.move(image_upload_path, image_storage_path)
             image['file_path'] = os.path.join(title, image_name)
@@ -106,18 +130,24 @@ class VideoList(Resource):
 
 
 class UploadFiles(Resource):
+    """
+    file upload api
+    """
 
     def post(self):
+        """
+        post api for file upload
+        """
         filename = str(time.time())
         filepath = os.path.join(
             os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-        with open(filepath, 'bw') as f:
+        with open(filepath, 'bw') as uploadfile:
             chunk_size = 1024
             while True:
                 chunk = request.stream.read(chunk_size)
                 if len(chunk) == 0:
                     break
-                f.write(chunk)
+                uploadfile.write(chunk)
         current_app.logger.info('file %s upload successfully', filename)
         return {'timestamp': filename}, http.HTTPStatus.CREATED
 

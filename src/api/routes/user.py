@@ -1,7 +1,9 @@
+"""
+user and authentication apis
+"""
 from http import HTTPStatus
 from flask import Blueprint, request, current_app, url_for
 from flask_restful import Api, Resource
-from flask_mail import Message
 from flask_jwt_extended import (
     create_access_token,
     get_jwt_identity,
@@ -20,9 +22,15 @@ user_api = Api(user_route)
 black_list = set()
 
 class UserItem(Resource):
+    """
+    user info get api
+    """
 
     @jwt_optional
     def get(self, username:str):
+        """
+        get user info by username
+        """
         user = User.get_by_username(username)
         if not user:
             return {'message': 'user do not exist'}, HTTPStatus.BAD_REQUEST
@@ -33,29 +41,44 @@ class UserItem(Resource):
             ret = UserSchema(
                 exclude=('created_at', 'updated_at', 'is_activate', 'email')).dump(user)
         return ret, HTTPStatus.OK
-        
+
 
 class UserList(Resource):
+    """
+    user list get api
+    """
 
     user_schema = UserSchema()
-    
+
     def post(self):
+        """
+        user sign in api and send email
+        """
+
         data = request.get_json()
         user = mash_load_validate(self.user_schema, data)
         ret = UserSchema(exclude=('created_at', 'updated_at', 'is_activate')).dump(user.save())
         token = generate_token(user.email, salt='activate')
         subject = 'Please confirm your registration'
         link = url_for('user_route.useractivateresource', token=token, _external=True)
-        text = 'Hi, Thanks for using multimedia manager! Please confirm your registration by clicking on the link: {}'.format(link)
-        msg = Message(subject, sender='zhouyang123200@sina.com', recipients=[user.email], body=text)
-        send_mail.delay(subject=subject, sender='zhouyang123200@sina.com', recipients=[user.email], text=text)
+        text = 'Hi, Thanks for using multimedia manager! Please confirm your registration\
+             by clicking on the link: {}'.format(link)
+        send_mail.delay(subject=subject, sender='zhouyang123200@sina.com', recipients=[user.email],
+         text=text)
         # current_app.logger.info('user %s send activate email successfully', user.username)
         return ret, HTTPStatus.CREATED
 
 
 class TokenResource(Resource):
+    """
+    jwt token generate api
+    """
 
     def post(self):
+        """
+        create token
+        """
+
         data = request.get_json()
         user_find_by_name = User.get_by_username(data.get('username'))
         if not user_find_by_name or not \
@@ -68,17 +91,31 @@ class TokenResource(Resource):
 
 
 class RevokeResource(Resource):
+    """
+    logout api
+    """
 
     @jwt_required
     def post(self):
+        """
+        disable jwt token
+        """
+
         jti = get_raw_jwt()['jti']
         black_list.add(jti)
         return {'message': 'Successfully logged out'}, HTTPStatus.OK
 
 
 class UserActivateResource(Resource):
+    """
+    user activate api using mail
+    """
 
     def get(self, token):
+        """
+        activate user by the token from mail
+        """
+
         email = verify_token(token, salt='activate')
         if not email:
             return {'message': 'Invalid token or token expired'}, HTTPStatus.BAD_REQUEST
@@ -92,20 +129,7 @@ class UserActivateResource(Resource):
         return {}, HTTPStatus.NO_CONTENT
 
 
-class MailResource(Resource):
-
-    def post(self):
-        data = request.get_json()
-        message = data['message']
-        msg = Message('hello', sender='zhouyang123200@sina.com', recipients=['zhouyang123200@hotmail.com'])
-        msg.body = message
-        current_app.logger.info('start send mail')
-        current_app.mail.send(msg)
-
-
 user_api.add_resource(UserList, '/api/users')
 user_api.add_resource(TokenResource, '/api/token')
 user_api.add_resource(RevokeResource, '/api/revoke')
-user_api.add_resource(MailResource, '/api/testmail')
 user_api.add_resource(UserActivateResource, '/api/users/activate/<regex("[a-zA-Z.0-9-_]+"):token>')
-
