@@ -1,6 +1,9 @@
+"""
+user models and schema
+"""
+from sqlalchemy import func
 from marshmallow_sqlalchemy import SQLAlchemySchema
-from marshmallow_sqlalchemy import fields as sqlma_fields
-from marshmallow import fields, Schema, validates, ValidationError
+from marshmallow import fields
 from api.utils.database import db
 from api.utils.passwd import hash_password
 
@@ -14,8 +17,9 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True)
     passwd = db.Column(db.String(300), nullable=True)
     is_activate = db.Column(db.Boolean(), default=False)
-    created_at = db.Column(db.DateTime(), nullable=True, server_default=db.func.now())
-    updated_at = db.Column(db.DateTime(), nullable=True, server_default=db.func.now(), onupdate=db.func.now())
+    created_at = db.Column(db.DateTime(), nullable=True, server_default=func.now())
+    updated_at = db.Column(db.DateTime(), nullable=True, server_default=func.now(),
+     onupdate=func.now())
 
     def save(self):
         db.session.add(self)
@@ -37,7 +41,7 @@ class User(db.Model):
 class UserSchema(SQLAlchemySchema):
 
     class Meta:
-        model = User 
+        model = User
         sqla_session = db.session
         load_instance = True
 

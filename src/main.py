@@ -4,7 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_mail import Mail
-from werkzeug.routing import BaseConverter 
+from werkzeug.routing import BaseConverter
 from api.config.config import DevelopmentConfig, ProductionConfig
 from api.utils.database import db
 from api.utils.passwd import jwt
