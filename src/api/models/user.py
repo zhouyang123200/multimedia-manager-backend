@@ -4,11 +4,14 @@ user models and schema
 from sqlalchemy import func
 from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow import fields
-from api.utils.database import db
+from api.utils.database import db, BaseMixin
 from api.utils.passwd import hash_password
 
 
-class User(db.Model):
+class User(BaseMixin, db.Model):
+    """
+    user model and some info
+    """
 
     __tablename__ = 'user'
 
@@ -21,11 +24,6 @@ class User(db.Model):
     updated_at = db.Column(db.DateTime(), nullable=True, server_default=func.now(),
      onupdate=func.now())
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-        return self
-
     def __repr__(self):
         return '<User %r>' % self.username
 
@@ -35,12 +33,21 @@ class User(db.Model):
 
     @classmethod
     def get_by_username(cls, username):
+        """
+        get user by username
+        """
         return cls.query.filter_by(username=username).first()
 
 
 class UserSchema(SQLAlchemySchema):
+    """
+    user model schema
+    """
 
     class Meta:
+        """
+        meta class
+        """
         model = User
         sqla_session = db.session
         load_instance = True
@@ -54,7 +61,7 @@ class UserSchema(SQLAlchemySchema):
     updated_at = fields.DateTime()
 
     def load_passwd(self, value):
+        """
+        hash password when dump
+        """
         return hash_password(value)
-
-
-

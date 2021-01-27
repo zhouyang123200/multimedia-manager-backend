@@ -6,11 +6,11 @@ from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow_sqlalchemy import fields as sqlma_fields
 from marshmallow import fields, Schema, validates, ValidationError
 
-from api.utils.database import db
+from api.utils.database import db, BaseMixin
 from api.utils.paginator import PaginationSchema
 from .file import VideoFileSchema, ImageFileSchema
 
-class Video(db.Model):
+class Video(BaseMixin, db.Model):
     """
     video model
     """
@@ -24,23 +24,8 @@ class Video(db.Model):
     created_at = db.Column(db.DateTime(), nullable=True, server_default=func.now())
     description = db.Column(db.String(120))
 
-    def save(self):
-        """
-        item save methed
-        """
-        db.session.add(self)
-        db.session.commit()
-        return self
-
     def __repr__(self):
         return '<Video %r>' % self.title
-
-    def delete(self):
-        """
-        object delete methed
-        """
-        db.session.delete(self)
-        db.session.commit()
 
 
 class VideoSchema(SQLAlchemySchema):
