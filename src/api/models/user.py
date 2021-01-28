@@ -1,6 +1,7 @@
 """
 user models and schema
 """
+from flask import url_for, current_app
 from sqlalchemy import func
 from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow import fields
@@ -19,6 +20,7 @@ class User(BaseMixin, db.Model):
     username = db.Column(db.String(120), unique=True)
     email = db.Column(db.String(120), unique=True)
     passwd = db.Column(db.String(300), nullable=True)
+    avatar_image = db.Column(db.String(100), default=None)
     is_activate = db.Column(db.Boolean(), default=False)
     created_at = db.Column(db.DateTime(), nullable=True, server_default=func.now())
     updated_at = db.Column(db.DateTime(), nullable=True, server_default=func.now(),
@@ -26,10 +28,6 @@ class User(BaseMixin, db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
 
     @classmethod
     def get_by_username(cls, username):
@@ -56,12 +54,24 @@ class UserSchema(SQLAlchemySchema):
     username = fields.String(required=True)
     email = fields.Email(required=True)
     passwd = fields.Method(required=True, deserialize='load_passwd')
+    avatar_image = fields.Method(serialize='get_image_url')
     is_activate = fields.Boolean()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
 
     def load_passwd(self, value):
         """
-        hash password when dump
+        hash password when load
         """
         return hash_password(value)
+
+    def get_image_url(self, user):
+        """
+        if user has avatar image, reuturn the url of image
+        else return the url of default image
+        """
+        image_url = url_for('static', filename='assets/default-avatar.jpg')
+        if user.avatar_image:
+            image_url = url_for('static', filename='{}/avatars/{}'.format(user.name,
+             user.avatar_image))
+        return image_url
