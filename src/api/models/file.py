@@ -1,51 +1,61 @@
+"""
+all kinds of file model and related schema
+"""
 import os
 from datetime import datetime
 from flask import current_app
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
-from marshmallow_sqlalchemy import fields as sqlma_fileds
 from marshmallow import fields
-from api.utils.database import db
+from api.utils.database import db, BaseMixin
 
 class FileMixin:
+    """
+    base model for file
+    """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     file_path = db.Column(db.String(120), unique=True, nullable=False)
     created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-        return self
 
-    def __repr__(self):
-        return '<VideoFile %r>' % self.id
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-
-class VideoFile(FileMixin, db.Model):
+class VideoFile(FileMixin, BaseMixin, db.Model):
+    """
+    video file model
+    """
 
     __tablename__ = 'video_file'
 
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
 
+    def __repr__(self):
+        return '<VidelFile %r>' % self.id
 
-class ImageFile(FileMixin, db.Model):
+
+class ImageFile(FileMixin, BaseMixin, db.Model):
+    """
+    image file model
+    """
 
     __tablename__ = 'image_file'
 
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
 
+    def __repr__(self):
+        return '<ImageFile %r>' % self.id
 
 class VideoFileSchema(SQLAlchemySchema):
+    """
+    video file model schema
+    """
 
     class Meta:
+        """
+        meta class
+        """
         model = VideoFile
         load_instance = True
         sqla_session = db.session
-    
+
     id = auto_field()
     created = auto_field()
     name = fields.String(required=True)
@@ -59,12 +69,18 @@ class VideoFileSchema(SQLAlchemySchema):
 
 
 class ImageFileSchema(SQLAlchemySchema):
+    """
+    image file model schema
+    """
 
     class Meta:
+        """
+        meta class
+        """
         model = ImageFile
         load_instance = True
         sqla_session = db.session
-    
+
     id = auto_field()
     created = auto_field()
     name = fields.String(required=True)
