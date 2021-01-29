@@ -1,6 +1,9 @@
 """
 user and authentication apis
 """
+import os
+import shutil
+import pathlib
 from http import HTTPStatus
 from flask import Blueprint, request, current_app, url_for
 from flask_restful import Api, Resource
@@ -11,7 +14,7 @@ from flask_jwt_extended import (
     jwt_required,
     get_raw_jwt
     )
-from api.models import User, UserSchema
+from api.models import User, UserSchema, AvatarSchema
 from api.utils.request_validate import mash_load_validate
 from api.utils.passwd import check_password, verify_token, generate_token
 from api.utils.tasks import send_mail
@@ -127,6 +130,42 @@ class UserActivateResource(Resource):
         user.is_activate = True
         user.save()
         return {}, HTTPStatus.NO_CONTENT
+
+
+class UserAvatarResource(Resource):
+    """
+    user avatar api
+    """
+
+    avatar_schema = AvatarSchema()
+    user_schema = UserSchema()
+
+    def put(self):
+        """
+        modify user avatar api
+        """
+        raw_data = request.get_json()
+        data = mash_load_validate(self.avatar_schema, raw_data)
+        user = User.query.filter_by(id=get_jwt_identity())
+        self.save_image(data['file_name'], data['image_name'], user.username)
+        user.avatar_image = data['image_name']
+        user.save()
+        ret = self.user_schema.dump(user)
+
+        return ret, HTTPStatus.OK
+
+    @staticmethod
+    def save_image(file_name:str, image_name:str, username:str):
+        """
+        rename file name and save it to user's specified path
+        """
+        upload_path = current_app.config['UPLOAD_FOLDER']
+        storage_path = current_app.config['FILE_STORAGE_PATH']
+        storage_dir = os.path.join(storage_path, 'users', username)
+        source_path = os.path.join(upload_path, file_name)
+        obj_path = os.path.join(storage_dir, image_name)
+        pathlib.Path(storage_dir).mkdir(parents=True, exist_ok=True)
+        shutil.move(source_path, obj_path)
 
 
 user_api.add_resource(UserList, '/api/users')
