@@ -1,3 +1,6 @@
+"""
+define flask main app factory function, and do all kinds of setup related app
+"""
 import os
 import pathlib
 import logging
@@ -5,7 +8,6 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_mail import Mail
 from werkzeug.routing import BaseConverter
-from api.config.config import DevelopmentConfig, ProductionConfig
 from api.utils.database import db
 from api.utils.passwd import jwt
 from api.utils.tasks import celery
@@ -14,6 +16,9 @@ from api.routes.user import user_route, black_list
 
 
 def create_app(config):
+    """
+    app factory
+    """
     app = Flask(__name__)
 
     app.config.from_object(config)
@@ -49,6 +54,11 @@ def create_all_dir(app):
     """
     pathlib.Path(app.config['UPLOAD_FOLDER']).mkdir(exist_ok=True)
     pathlib.Path(app.config['FILE_STORAGE_PATH']).mkdir(exist_ok=True)
+    user_file_path = os.path.join(app.config['FILE_STORAGE_PATH'], 'users')
+    assets_file_path = os.path.join(app.config['FILE_STORAGE_PATH'], 'assets')
+    pathlib.Path(user_file_path).mkdir(exist_ok=True)
+    pathlib.Path(assets_file_path).mkdir(exist_ok=True)
+
 
 def setup_log(app):
     """
@@ -84,6 +94,9 @@ def create_regex(app):
     let flask url support regex
     """
     class RegexConverter(BaseConverter):
+        """
+        regex converter class
+        """
         def __init__(self, map, *args):
             self.map = map
             self.regex = args[0]
@@ -91,12 +104,17 @@ def create_regex(app):
     app.url_map.converters['regex'] = RegexConverter
 
 def make_celery(app):
-
+    """
+    celery app factory
+    """
     celery.conf.broker_url = app.config['CELERY_BROKER_URL']
     celery.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
     celery.conf.update(app.config)
 
     class ContextTask(celery.Task):
+        """
+        celery context task class, make every celery task with same flask app
+        """
         def __call__(self, *args, **kwargs):
             with app.app_context():
                 return self.run(*args, **kwargs)
@@ -108,6 +126,6 @@ def celery_setup(flask_app):
     """
     init celery app
     """
-    celery = make_celery(flask_app)
-    celery.finalize()
-    flask_app.celery = celery
+    celery_app = make_celery(flask_app)
+    celery_app.finalize()
+    flask_app.celery = celery_app

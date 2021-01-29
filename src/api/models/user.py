@@ -1,10 +1,10 @@
 """
 user models and schema
 """
-from flask import url_for, current_app
+from flask import url_for
 from sqlalchemy import func
 from marshmallow_sqlalchemy import SQLAlchemySchema
-from marshmallow import fields
+from marshmallow import fields, Schema, validates, ValidationError
 from api.utils.database import db, BaseMixin
 from api.utils.passwd import hash_password
 
@@ -72,6 +72,24 @@ class UserSchema(SQLAlchemySchema):
         """
         image_url = url_for('static', filename='assets/default-avatar.jpg')
         if user.avatar_image:
-            image_url = url_for('static', filename='{}/avatars/{}'.format(user.name,
+            image_url = url_for('static', filename='users/{}/avatars/{}'.format(user.name,
              user.avatar_image))
         return image_url
+
+
+class AvatarSchema(Schema):
+    """
+    user avatar upload schema
+    """
+
+    file_name = fields.String(required=True)
+    image_name = fields.String(required=True)
+
+    @validates('image_name')
+    def verify_image_name(self, value:str):
+        """
+        only allow several image type
+        """
+
+        if not value.startswith('.jpg'):
+            raise ValidationError('The image\'s type is not allowed')
