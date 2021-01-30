@@ -54,7 +54,7 @@ class UserSchema(SQLAlchemySchema):
     username = fields.String(required=True)
     email = fields.Email(required=True)
     passwd = fields.Method(required=True, deserialize='load_passwd')
-    avatar_image = fields.Method(serialize='get_image_url')
+    avatar_url = fields.Method(serialize='get_image_url')
     is_activate = fields.Boolean()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
@@ -70,10 +70,10 @@ class UserSchema(SQLAlchemySchema):
         if user has avatar image, reuturn the url of image
         else return the url of default image
         """
-        image_url = url_for('static', filename='assets/default-avatar.jpg')
+        image_url = url_for('static', filename='assets/default-avatar.jpg', _external=False)
         if user.avatar_image:
-            image_url = url_for('static', filename='users/{}/avatars/{}'.format(user.name,
-             user.avatar_image))
+            image_url = url_for('static', filename='users/{}/avatar/{}'.format(user.username,
+             user.avatar_image, _external=False))
         return image_url
 
 
@@ -91,5 +91,5 @@ class AvatarSchema(Schema):
         only allow several image type
         """
 
-        if not value.startswith('.jpg'):
+        if not value.endswith('.jpg'):
             raise ValidationError('The image\'s type is not allowed')

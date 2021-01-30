@@ -139,32 +139,64 @@ class UserAvatarResource(Resource):
 
     avatar_schema = AvatarSchema()
     user_schema = UserSchema()
+    storage_path = os.path.join(
+        '{storage_path}',
+        'users',
+        '{username}'
+        )
 
+    @jwt_required
     def put(self):
         """
         modify user avatar api
         """
         raw_data = request.get_json()
         data = mash_load_validate(self.avatar_schema, raw_data)
-        user = User.query.filter_by(id=get_jwt_identity())
-        self.save_image(data['file_name'], data['image_name'], user.username)
+        user = User.query.filter_by(id=get_jwt_identity()).first()
+        origin_avatar = user.avatar_image
+        storage_path = self.storage_path.format(
+            storage_path=current_app.config.get('FILE_STORAGE_PATH'),
+            username=user.username
+        )
+        self.save_image(
+            data['file_name'],
+            data['image_name'],
+            storage_path
+        )
         user.avatar_image = data['image_name']
         user.save()
+        self.delete_avatar(origin_avatar, storage_path)
         ret = self.user_schema.dump(user)
 
         return ret, HTTPStatus.OK
 
-    @staticmethod
-    def save_image(file_name:str, image_name:str, username:str):
+    @classmethod
+    def delete_avatar(cls, image_name:str, storage_path:str):
+        """
+        delete user's avatar
+        """
+        if image_name:
+            avatar_path = os.path.join(
+                storage_path,
+                image_name
+            )
+            os.remove(avatar_path)
+
+    @classmethod
+    def save_image(cls, file_name:str, image_name:str, storage_path:str):
         """
         rename file name and save it to user's specified path
         """
-        upload_path = current_app.config['UPLOAD_FOLDER']
-        storage_path = current_app.config['FILE_STORAGE_PATH']
-        storage_dir = os.path.join(storage_path, 'users', username)
-        source_path = os.path.join(upload_path, file_name)
-        obj_path = os.path.join(storage_dir, image_name)
-        pathlib.Path(storage_dir).mkdir(parents=True, exist_ok=True)
+        source_path = os.path.join(
+            current_app.config['UPLOAD_FOLDER'],
+            file_name
+        )
+        obj_path = os.path.join(
+            storage_path,
+            image_name
+        )
+        pathlib.Path(storage_path).\
+            mkdir(parents=True, exist_ok=True)
         shutil.move(source_path, obj_path)
 
 
@@ -172,3 +204,4 @@ user_api.add_resource(UserList, '/api/users')
 user_api.add_resource(TokenResource, '/api/token')
 user_api.add_resource(RevokeResource, '/api/revoke')
 user_api.add_resource(UserActivateResource, '/api/users/activate/<regex("[a-zA-Z.0-9-_]+"):token>')
+user_api.add_resource(UserAvatarResource, '/api/user/avatar')

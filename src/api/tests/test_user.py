@@ -2,8 +2,11 @@
 user api test suit
 """
 import json
+import shutil
+import os
 from http import HTTPStatus
 from flask import url_for
+from flask_jwt_extended import create_access_token
 from api.models import UserSchema
 from api.utils.passwd import generate_token
 
@@ -21,6 +24,7 @@ def create_user(app):
     user = UserSchema().load(USERDATA)
     with app.app_context():
         user.save()
+        print(user)
     return user
 
 def test_post_user(app):
@@ -32,7 +36,6 @@ def test_post_user(app):
     data = json.loads(response.data)
     assert USERDATA.get('username') == data.get('username')
     assert USERDATA.get('email') == data.get('email')
-    assert '/static/assets/default-avatar.jpg' == data.get('avatar_image')
 
 def test_post_token(app):
     """
@@ -70,3 +73,30 @@ def test_activate_user(app):
         test_uri = url_for('user_route.useractivateresource', token=token, _external=False)
     response = app.test_client().get(test_uri)
     assert response.status_code == HTTPStatus.NO_CONTENT
+
+def test_put_avatar(app, shared_datadir):
+    """
+    test user avatar put api
+    """
+    user = create_user(app)
+    with app.app_context():
+        user_id = user.id
+        access_token = create_access_token(identity=user_id, fresh=True)
+    test_uri = '/api/user/avatar'
+    timestamp = '1608130297.1875460'
+    image_name = 'sample.jpg'
+
+    client = app.test_client()
+    avatar_src = os.path.join(shared_datadir, image_name)
+    avatar_dst = os.path.join(app.config['UPLOAD_FOLDER'], timestamp)
+    shutil.copyfile(avatar_src, avatar_dst)
+
+    headers = {'Authorization': f'Bearer {access_token}'}
+    data = {
+        'file_name': timestamp,
+        'image_name': image_name,
+    }
+    response = client.put(test_uri, headers=headers, json=data)
+    data = json.loads(response.data)
+    assert response.status_code == HTTPStatus.OK
+    assert data.get('avatar_url') == f'/static/users/{user.username}/avatar/{image_name}'
