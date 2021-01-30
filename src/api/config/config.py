@@ -12,8 +12,8 @@ class Config(object):
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     LOG_FILE = '/home/zhouyang/log/app.log'
     LOG_LEVEL = logging.INFO
-    CELERY_BROKER_URL = "amqp://localhost:5672//" 
-    CELERY_RESULT_BACKEND = "rpc://" 
+    CELERY_BROKER_URL = "amqp://localhost:5672//"
+    CELERY_RESULT_BACKEND = "rpc://"
 
 
 class ProductionConfig(Config):
@@ -28,12 +28,12 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///../database.db'
     FILE_STORAGE_PATH = '/mnt/mediadata'
     MAIL_SERVER = ''
-    MAIL_PORT = 25 
+    MAIL_PORT = 25
     MAIL_USERNAME = ''
-    MAIL_PASSWORD = '' 
+    MAIL_PASSWORD = ''
     MAIL_SUPPRESS_SEND = True
-    CELERY_BROKER_URL = "amqp://localhost:5672//" 
-    CELERY_RESULT_BACKEND = "rpc://" 
+    CELERY_BROKER_URL = "amqp://localhost:5672//"
+    CELERY_RESULT_BACKEND = "rpc://"
 
 
 class TestConfig(Config):

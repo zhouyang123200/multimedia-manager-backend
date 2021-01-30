@@ -37,14 +37,13 @@ def test_post_video(app, shared_datadir):
     assert 'test_video' == data.get('title')
     assert 'test_video.mp4' in data.get('video_files')[0].get('url')
 
-def test_get_videos(app, shared_datadir):
+def test_get_videos(app):
     """
     test videos get api.
     """
 
     test_uri = '/api/videos'
     video_title = 'video'
-    video_one_filepath = os.path.join(app.config['FILE_STORAGE_PATH'], video_title)
     video_schema = VideoSchema()
     video_data = {
         'title': video_title,
