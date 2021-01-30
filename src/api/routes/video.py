@@ -13,6 +13,7 @@ from webargs import fields
 from webargs.flaskparser import use_kwargs
 from api.models import VideoSchema, VideoRawSchema, Video, VideoPaginationSchema
 from api.utils.request_validate import mash_load_validate
+from api.utils.limiter import limiter
 
 video_route = Blueprint('video_route', __name__)
 video_api = Api(video_route)
@@ -67,6 +68,7 @@ class VideoList(Resource):
     video_schema = VideoSchema()
     video_pagenation_schema = VideoPaginationSchema()
     raw_video_schema = VideoRawSchema()
+    decorators = [limiter.limit('200 per minute', methods=['GET'], error_message='Too Many Requests')]
 
     @use_kwargs({'page': fields.Int(missing=1),
                             'query': fields.Str(missing=''),

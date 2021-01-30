@@ -11,6 +11,7 @@ from werkzeug.routing import BaseConverter
 from api.utils.database import db
 from api.utils.passwd import jwt
 from api.utils.tasks import celery
+from api.utils.limiter import limiter
 from api.routes.video import video_route
 from api.routes.user import user_route, black_list
 
@@ -30,6 +31,7 @@ def create_app(config):
     setup_log(app)
     mail_setup(app)
     celery_setup(app)
+    setup_api_limiter(app)
 
     return app
 
@@ -129,3 +131,9 @@ def celery_setup(flask_app):
     celery_app = make_celery(flask_app)
     celery_app.finalize()
     flask_app.celery = celery_app
+
+def setup_api_limiter(app):
+    """
+    user flask limiter to limit api access rate
+    """
+    limiter.init_app(app)

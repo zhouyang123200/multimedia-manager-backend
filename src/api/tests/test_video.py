@@ -69,6 +69,13 @@ def test_get_videos(app):
     assert 5 == ret.get('pages')
     assert ret.get('links').get('next') == 'http://localhost' + test_uri + '?' + urlencode({'page': 2, 'per_page': 2})
 
+def test_api_limiter(app):
+    """
+    test api rate limiter
+    """
 
-
+    for i in range(1, 250):
+        response = app.test_client().get('/api/videos')
+        if i == 201:
+            assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
 
