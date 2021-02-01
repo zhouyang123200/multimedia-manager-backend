@@ -5,7 +5,8 @@ import os
 import pathlib
 import logging
 from logging.handlers import RotatingFileHandler
-from flask import Flask
+from flask import Flask, jsonify
+from flask_swagger import swagger
 from flask_mail import Mail
 from werkzeug.routing import BaseConverter
 from api.utils.database import db
@@ -32,6 +33,7 @@ def create_app(config):
     mail_setup(app)
     celery_setup(app)
     setup_api_limiter(app)
+    init_swagger(app)
 
     return app
 
@@ -99,8 +101,8 @@ def create_regex(app):
         """
         regex converter class
         """
-        def __init__(self, map, *args):
-            self.map = map
+        def __init__(self, mapper, *args):
+            self.map = mapper
             self.regex = args[0]
 
     app.url_map.converters['regex'] = RegexConverter
@@ -137,3 +139,13 @@ def setup_api_limiter(app):
     user flask limiter to limit api access rate
     """
     limiter.init_app(app)
+
+def init_swagger(app):
+    """
+    use flask-swagger to provide api spec service
+    """
+    @app.route("/spec")
+    def spec():
+        base_path = os.path.join(app.root_path, 'docs')
+        swag = swagger(app)
+        return jsonify(swagger(app))

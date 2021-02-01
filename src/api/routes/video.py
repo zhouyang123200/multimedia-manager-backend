@@ -134,6 +134,7 @@ class VideoList(Resource):
 class UploadFiles(Resource):
     """
     file upload api
+    swagger_from_file: file/file_post.yml
     """
 
     def post(self):

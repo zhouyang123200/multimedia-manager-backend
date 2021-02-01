@@ -1,0 +1,20 @@
+upload a file
+---
+tags:
+  - file
+summary: upload new file
+consumes:
+  - multipart/form-data
+parameters:
+  - in: formData
+    name: upfile
+    type: file
+    description: The file to upload.
+responses:
+  200:
+    description: return a timestamp
+    schema:
+      type: object
+      properties:
+        timestamp:
+          type: string
