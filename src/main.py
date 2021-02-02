@@ -5,8 +5,8 @@ import os
 import pathlib
 import logging
 from logging.handlers import RotatingFileHandler
-from flask import Flask, jsonify
-from flask_swagger import swagger
+from flask import Flask
+from flasgger import Swagger
 from flask_mail import Mail
 from werkzeug.routing import BaseConverter
 from api.utils.database import db
@@ -142,10 +142,6 @@ def setup_api_limiter(app):
 
 def init_swagger(app):
     """
-    use flask-swagger to provide api spec service
+    use Flasgger to provide api spec service
     """
-    @app.route("/spec")
-    def spec():
-        base_path = os.path.join(app.root_path, 'docs')
-        swag = swagger(app)
-        return jsonify(swagger(app))
+    Swagger(app)

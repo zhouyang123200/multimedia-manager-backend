@@ -8,12 +8,14 @@ import http
 import time
 from flask import Blueprint, request, current_app
 from flask_restful import Api, Resource
+from flasgger import swag_from
 from sqlalchemy import desc
 from webargs import fields
 from webargs.flaskparser import use_kwargs
 from api.models import VideoSchema, VideoRawSchema, Video, VideoPaginationSchema
 from api.utils.request_validate import mash_load_validate
 from api.utils.limiter import limiter
+from api.utils.base import BASE_DIR
 
 video_route = Blueprint('video_route', __name__)
 video_api = Api(video_route)
@@ -134,9 +136,9 @@ class VideoList(Resource):
 class UploadFiles(Resource):
     """
     file upload api
-    swagger_from_file: file/file_post.yml
     """
 
+    @swag_from(os.path.join(BASE_DIR, 'docs/file/file_post.yml'), methods=['POST'])
     def post(self):
         """
         post api for file upload
