@@ -30,6 +30,7 @@ class VideoItem(Resource):
     static_url = '/static/'
     media_url = '/media/'
 
+    @swag_from(os.path.join(BASE_DIR, 'docs/video/video_get.yml'), methods=['GET'])
     def get(self, video_id):
         """
         video get api
@@ -51,6 +52,7 @@ class VideoItem(Resource):
         result = self.video_schema.dump(video)
         return result, http.HTTPStatus.NO_CONTENT
 
+    @swag_from(os.path.join(BASE_DIR, 'docs/video/video_delete.yml'), methods=['DELETE'])
     def delete(self, video_id):
         """
         video delete api
@@ -72,6 +74,8 @@ class VideoList(Resource):
     raw_video_schema = VideoRawSchema()
     decorators = [limiter.limit('200 per minute', methods=['GET'], error_message='Too Many Requests')]
 
+
+    @swag_from(os.path.join(BASE_DIR, 'docs/video/video_list_get.yml'), methods=['GET'])
     @use_kwargs({'page': fields.Int(missing=1),
                             'query': fields.Str(missing=''),
                            'per_page': fields.Int(missing=5)}, location='query')
@@ -86,6 +90,7 @@ class VideoList(Resource):
         ret = self.video_pagenation_schema.dump(videos)
         return ret, http.HTTPStatus.OK
 
+    @swag_from(os.path.join(BASE_DIR, 'docs/video/video_list_post.yml'), methods=['POST'])
     def post(self):
         """
         video create api

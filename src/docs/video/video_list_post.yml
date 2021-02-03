@@ -1,0 +1,38 @@
+vidoes post api
+---
+tags:
+  - video
+summary: add new video item
+operationId: addVideo
+consumes:
+  - application/json
+produces:
+- application/json
+parameters:
+  - in: body
+    name: body
+    description: Video object that needs to be added
+    schema:
+      type: object
+      required:
+        - videos
+      properties:
+        videos:
+          type: array
+          items:
+            properties:
+              video_num:
+                type: string
+              video_name:
+                type: string
+        image_nums:
+          type: array
+          items:
+            properties:
+              image_num:
+                type: string
+              image_name:
+                type: string
+responses:
+  400:
+    description: timestamp error

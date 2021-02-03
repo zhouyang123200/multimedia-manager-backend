@@ -1,0 +1,38 @@
+vidoe obj get api
+---
+tags:
+  - video
+summary: get a video
+description: return a single video for its id
+parameters:
+  - name: id
+    in: path
+    required: true
+    type: integer
+definitions:
+  Image:
+    type: object
+    properties:
+      name:
+        type: string
+      url:
+        type: string
+  Video:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      url:
+        type: string
+      images:
+        type: array
+        items:
+          $ref: '#/definitions/Image'
+responses:
+  200:
+    description: a video
+    schema:
+      $ref: '#/definitions/Video'

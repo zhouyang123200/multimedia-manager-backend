@@ -1,0 +1,14 @@
+video obj delete api
+---
+tags:
+- video
+summary: delete a video
+description: delete a video and related images
+parameters:
+  - name: id
+    in: path
+    required: true
+    type: integer
+responses:
+  404:
+    description: the video id not exist
