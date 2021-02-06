@@ -81,5 +81,3 @@ class VideoRawSchema(Schema):
     video_files = fields.List(fields.Nested(RawFileSchema))
     image_files = fields.List(fields.Nested(RawFileSchema))
     description = fields.String()
-
-

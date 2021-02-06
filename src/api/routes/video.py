@@ -45,9 +45,18 @@ class VideoItem(Resource):
         """
         video = Video.query.get(vedio_id)
         data = request.get_json()
-        for key in video:
-            if key in data:
-                setattr(video, key, data.get(key))
+        exclude_fields = list(
+            item for item in self.video_schema.load_fields if item not in data
+        )
+        include_fields = list(
+            item for item in data if item in self.video_schema.load_fields
+        )
+        exclude_fields.append('image_files')
+        exclude_fields.append('video_files')
+        updated_video = mash_load_validate(self.video_schema, data, partial=exclude_fields)
+
+        for key in include_fields:
+            setattr(video, key, getattr(updated_video, key))
         video.save()
         result = self.video_schema.dump(video)
         return result, http.HTTPStatus.NO_CONTENT
@@ -72,7 +81,10 @@ class VideoList(Resource):
     video_schema = VideoSchema()
     video_pagenation_schema = VideoPaginationSchema()
     raw_video_schema = VideoRawSchema()
-    decorators = [limiter.limit('200 per minute', methods=['GET'], error_message='Too Many Requests')]
+    decorators = [
+        limiter.limit('200 per minute', methods=['GET'],
+        error_message='Too Many Requests')
+    ]
 
 
     @swag_from(os.path.join(BASE_DIR, 'docs/video/video_list_get.yml'), methods=['GET'])
