@@ -1,6 +1,9 @@
+"""
+title: video api test
+description: all test suits for video api
+"""
 import os
 import json
-import pathlib
 from shutil import copyfile
 from http import HTTPStatus
 from urllib.parse import urlencode
@@ -37,6 +40,27 @@ def test_post_video(app, shared_datadir):
     assert 'test_video' == data.get('title')
     assert 'test_video.mp4' in data.get('video_files')[0].get('url')
 
+def test_put_video(app):
+    """
+    put a video entry
+    """
+    test_uri = '/api/video/1'
+    video_data = {
+        'title': 'video_one',
+        'description': 'this is video description'
+    }
+    with app.app_context():
+        video = VideoSchema().load(video_data)
+        video.save()
+    response = app.test_client().put(test_uri, json={'title': 'title_two'})
+    data = json.loads(response.data)
+    assert data.get('title') == 'title_two'
+    response = app.test_client().\
+        put(test_uri, json={'description': 'video description has changed'})
+    data = json.loads(response.data)
+    assert data.get('description') == 'video description has changed'
+
+
 def test_get_videos(app):
     """
     test videos get api.
@@ -47,8 +71,12 @@ def test_get_videos(app):
     video_schema = VideoSchema()
     video_data = {
         'title': video_title,
-        'video_files': [{'name': 'video_file_one', 'file_path': os.path.join(video_title, 'video_file_one')}],
-        'image_files': [{'name': 'image_file_one', 'file_path': os.path.join(video_title, 'image_file_one')}],
+        'video_files': [
+            {'name': 'video_file_one', 'file_path': os.path.join(video_title, 'video_file_one')}
+        ],
+        'image_files': [
+            {'name': 'image_file_one', 'file_path': os.path.join(video_title, 'image_file_one')}
+        ],
         'description': 'test video description.'
     }
 
@@ -56,8 +84,10 @@ def test_get_videos(app):
         for num in range(10):
             data = video_data.copy()
             data['title'] = data['title'] + "_" + str(num)
-            data['video_files'][0]['file_path'] =  data['video_files'][0]['file_path'] + '_' + str(num)
-            data['image_files'][0]['file_path'] = data['image_files'][0]['file_path'] + '_' + str(num)
+            data['video_files'][0]['file_path'] = \
+                 data['video_files'][0]['file_path'] + '_' + str(num)
+            data['image_files'][0]['file_path'] = \
+                 data['image_files'][0]['file_path'] + '_' + str(num)
             video_obj = video_schema.load(data)
             db.session.add(video_obj)
         db.session.commit()
@@ -66,8 +96,9 @@ def test_get_videos(app):
     ret = json.loads(rv.data)
     assert rv.status_code == HTTPStatus.OK
     assert 'data' in ret
-    assert 5 == ret.get('pages')
-    assert ret.get('links').get('next') == 'http://localhost' + test_uri + '?' + urlencode({'page': 2, 'per_page': 2})
+    assert ret.get('pages') == 5
+    assert ret.get('links').get('next') == 'http://localhost' + test_uri +\
+         '?' + urlencode({'page': 2, 'per_page': 2})
 
 def test_api_limiter(app):
     """
@@ -78,4 +109,3 @@ def test_api_limiter(app):
         response = app.test_client().get('/api/videos')
         if i == 201:
             assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
-

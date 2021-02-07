@@ -39,11 +39,11 @@ class VideoItem(Resource):
         result = self.video_schema.dump(video)
         return result, http.HTTPStatus.OK
 
-    def put(self, vedio_id):
+    def put(self, video_id):
         """
         video put api
         """
-        video = Video.query.get(vedio_id)
+        video = Video.query.get(video_id)
         data = request.get_json()
         exclude_fields = list(
             item for item in self.video_schema.load_fields if item not in data
@@ -59,7 +59,7 @@ class VideoItem(Resource):
             setattr(video, key, getattr(updated_video, key))
         video.save()
         result = self.video_schema.dump(video)
-        return result, http.HTTPStatus.NO_CONTENT
+        return result, http.HTTPStatus.OK
 
     @swag_from(os.path.join(BASE_DIR, 'docs/video/video_delete.yml'), methods=['DELETE'])
     def delete(self, video_id):
@@ -174,6 +174,6 @@ class UploadFiles(Resource):
         return {'timestamp': filename}, http.HTTPStatus.CREATED
 
 
-video_api.add_resource(VideoItem, '/api/video/<int:id>')
+video_api.add_resource(VideoItem, '/api/video/<int:video_id>')
 video_api.add_resource(VideoList, '/api/videos')
 video_api.add_resource(UploadFiles, '/api/files')
