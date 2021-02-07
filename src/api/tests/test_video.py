@@ -37,6 +37,26 @@ def test_post_video(app, shared_datadir):
     assert 'test_video' == data.get('title')
     assert 'test_video.mp4' in data.get('video_files')[0].get('url')
 
+def test_put_video(app):
+    """
+    put a video entry
+    """
+    test_uri = '/api/video/1'
+    video_data = {
+        'title': 'video_one',
+        'description': 'this is video description'
+    }
+    with app.app_context():
+        video = VideoSchema().load(video_data)
+        video.save()
+    response = app.test_client().put(test_uri, json={'title': 'title_two'})
+    data = json.loads(response.data)
+    assert data.get('title') == 'title_two'
+    response = app.test_client().put(test_uri, json={'description': 'video description has changed'})
+    data = json.loads(response.data)
+    assert data.get('description') == 'video description has changed'
+
+
 def test_get_videos(app):
     """
     test videos get api.
