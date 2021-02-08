@@ -100,6 +100,36 @@ def test_get_videos(app):
     assert ret.get('links').get('next') == 'http://localhost' + test_uri +\
          '?' + urlencode({'page': 2, 'per_page': 2})
 
+def test_subvideo_post(app, shared_datadir):
+    """
+    test video's subvideo post api
+    """
+    test_uri = '/api/video/1/subvideos'
+    response = app.test_client().post(
+        test_uri,
+        json={'num': '1234', 'name': 'video name'}
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    with app.app_context():
+        video = VideoSchema().load({
+            'title': 'video title',
+            'description': 'this is description',
+        })
+        video.save()
+    video_src = os.path.join(shared_datadir, 'sample.mp4')
+    video_dst = os.path.join(app.config['UPLOAD_FOLDER'], '1608130297.1875458')
+    copyfile(video_src, video_dst)
+    response = app.test_client().post(
+        test_uri,
+        json={'num': '1608130297.1875458', 'name': 'myvideo.mp4'}
+    )
+    print(response.data)
+    assert response.status_code == HTTPStatus.OK
+    data = response.get_json()
+    print(data)
+    assert data.get('video_files')[0]['name'] == 'myvideo.mp4'
+
+
 def test_api_limiter(app):
     """
     test api rate limiter
