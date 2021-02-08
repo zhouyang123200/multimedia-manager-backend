@@ -7,12 +7,19 @@ import shutil
 import http
 import time
 from flask import Blueprint, request, current_app
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, abort
 from flasgger import swag_from
 from sqlalchemy import desc
 from webargs import fields
 from webargs.flaskparser import use_kwargs
-from api.models import VideoSchema, VideoRawSchema, Video, VideoPaginationSchema
+from api.models import (
+    VideoSchema,
+    VideoRawSchema,
+    Video,
+    VideoPaginationSchema,
+    RawFileSchema,
+    VideoFileSchema
+)
 from api.utils.request_validate import mash_load_validate
 from api.utils.limiter import limiter
 from api.utils.base import BASE_DIR
@@ -120,8 +127,8 @@ class VideoList(Resource):
         """
         move related file from upload file path to storage file path
         """
-        videos = data.get('video_files')
-        images = data.get('image_files')
+        videos = data.get('video_files', [])
+        images = data.get('image_files', [])
 
         # judge the exits of video and images
         upload_path = current_app.config['UPLOAD_FOLDER']
@@ -174,6 +181,57 @@ class UploadFiles(Resource):
         return {'timestamp': filename}, http.HTTPStatus.CREATED
 
 
+class SubVideos(Resource):
+    """
+    video's sub subvideos
+    """
+
+    raw_file_schema = RawFileSchema()
+    videofile_schema = VideoFileSchema()
+    video_schema = VideoSchema()
+
+    def post(self, video_id):
+        """
+        post api for subvideos
+        """
+
+        data = request.get_json()
+        video = Video.query.get(video_id)
+        if not video:
+            return {'message': 'video entry not exist'}, http.HTTPStatus.NOT_FOUND
+        raw_file = mash_load_validate(self.raw_file_schema, data)
+        dest_path = os.path.join(
+            current_app.config['FILE_STORAGE_PATH'],
+            video.title,
+            raw_file['name']
+        )
+        self.convert_tmpfile(raw_file['num'], dest_path)
+        videofile_data = {
+            'name': raw_file['name'],
+            'file_path': dest_path
+        }
+        videofile = mash_load_validate(self.videofile_schema, videofile_data)
+        video.video_files.append(videofile)
+        ret = self.video_schema.dump(video.save())
+
+        return ret, http.HTTPStatus.OK
+
+    @staticmethod
+    def convert_tmpfile(src_file_name:str, dest_path:str):
+        """
+        convert the tmp file to the destination path
+        """
+        src_path = os.path.join(
+            current_app.config['UPLOAD_FOLDER'],
+            src_file_name
+        )
+        if not os.path.exists(src_path):
+            abort(http.HTTPStatus.BAD_REQUEST, message='raw file not exist')
+        pathlib.Path(os.path.dirname(dest_path)).mkdir(parents=True, exist_ok=True)
+        shutil.move(src_path, dest_path)
+
+
 video_api.add_resource(VideoItem, '/api/video/<int:video_id>')
 video_api.add_resource(VideoList, '/api/videos')
 video_api.add_resource(UploadFiles, '/api/files')
+video_api.add_resource(SubVideos, '/api/video/<int:video_id>/subvideos')
