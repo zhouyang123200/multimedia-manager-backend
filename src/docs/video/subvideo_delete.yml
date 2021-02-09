@@ -1,0 +1,28 @@
+subvideo obj delete api
+---
+tags:
+- subvideo
+summary: delete a video's subvideo file
+description: delete a video and related file
+parameters:
+  - name: video_id
+    in: path
+    required: true
+    type: integer
+  - name: subvideo_name
+    in: path
+    required: true
+    type: string
+responses:
+  404:
+    description: the video id not exist
+  204:
+    description: delete succeed
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: delete success
