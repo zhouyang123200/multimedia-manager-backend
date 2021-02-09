@@ -1,0 +1,56 @@
+subvidoes post api
+---
+tags:
+  - subvideo
+summary: add new subvideo item to specified video
+consumes:
+  - application/json
+produces:
+  - application/json
+definitions:
+  Image:
+    type: object
+    properties:
+      name:
+        type: string
+      url:
+        type: string
+  Video:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      url:
+        type: string
+      images:
+        type: array
+        items:
+          $ref: '#/definitions/Image'
+parameters:
+  - in: body
+    name: body
+    description: SubVideo object that needs to be added
+    schema:
+      type: object
+      required:
+        - name
+        - num
+      properties:
+        name:
+          type: string
+          description: video file name
+        num:
+          type: string
+          description: the timestamp of upload video file
+responses:
+  404:
+    description: The video of subvideo file not exist
+  201:
+    description: create succeed
+    content:
+      application/json:
+        schema:
+          $ref: '#/definitions/Video'

@@ -1,7 +1,7 @@
 subvideo obj delete api
 ---
 tags:
-- videofile
+- subvideo
 summary: delete a video's subvideo file
 description: delete a video and related file
 parameters:

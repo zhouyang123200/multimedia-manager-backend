@@ -191,6 +191,7 @@ class SubVideoList(Resource):
     videofile_schema = VideoFileSchema()
     video_schema = VideoSchema()
 
+    @swag_from(os.path.join(BASE_DIR, 'docs/video/subvideo_list_post.yml'), methods=['POST'])
     def post(self, video_id):
         """
         post api for subvideos
