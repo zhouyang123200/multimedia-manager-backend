@@ -4,10 +4,11 @@ description: all test suits for video api
 """
 import os
 import json
+import pathlib
 from shutil import copyfile
 from http import HTTPStatus
 from urllib.parse import urlencode
-from api.models.video import VideoSchema
+from api.models.video import VideoSchema, VideoFileSchema
 from api.utils.database import db
 
 
@@ -129,6 +130,33 @@ def test_subvideo_post(app, shared_datadir):
     print(data)
     assert data.get('video_files')[0]['name'] == 'myvideo.mp4'
 
+def test_subvideo_delete(app, shared_datadir):
+    """
+    test subvideo delete api
+    """
+    test_uri = '/api/video/1/subvideos/myvideo.mp4'
+    response = app.test_client().delete(test_uri)
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    with app.app_context():
+        video = VideoSchema().load({
+            'title': 'video title',
+            'description': 'this is a description'
+        })
+        video.save()
+        video_dst = os.path.join(app.config['FILE_STORAGE_PATH'], video.title, 'myvideo.mp4')
+        video_src = os.path.join(shared_datadir, 'sample.mp4')
+        pathlib.Path(os.path.dirname(video_dst)).mkdir(parents=True, exist_ok=True)
+        copyfile(video_src, video_dst)
+        subvideo = VideoFileSchema().load({
+            'name': 'myvideo.mp4',
+            'file_path': video_dst
+        })
+        video.video_files.append(subvideo)
+        video.save()
+    response = app.test_client().delete(test_uri)
+    assert response.status_code == HTTPStatus.NO_CONTENT
+    response = app.test_client().delete(test_uri)
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 def test_api_limiter(app):
     """

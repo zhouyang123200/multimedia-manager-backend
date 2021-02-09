@@ -18,7 +18,8 @@ from api.models import (
     Video,
     VideoPaginationSchema,
     RawFileSchema,
-    VideoFileSchema
+    VideoFileSchema,
+    VideoFile
 )
 from api.utils.request_validate import mash_load_validate
 from api.utils.limiter import limiter
@@ -181,7 +182,7 @@ class UploadFiles(Resource):
         return {'timestamp': filename}, http.HTTPStatus.CREATED
 
 
-class SubVideos(Resource):
+class SubVideoList(Resource):
     """
     video's sub subvideos
     """
@@ -231,7 +232,33 @@ class SubVideos(Resource):
         shutil.move(src_path, dest_path)
 
 
+class SubVideoItem(Resource):
+    """
+    The api of video's subvideo item
+    """
+
+    def delete(self, video_id, subvideo_name):
+        """
+        delete api for subvideos
+        """
+
+        video = Video.query.get(video_id)
+        if not video:
+            return {'message': 'video entry not exist'}, http.HTTPStatus.NOT_FOUND
+        videofile = VideoFile.query.filter_by(name=subvideo_name).first()
+        if videofile:
+            videofile.delete()
+        else:
+            return {'message': 'no related video file'}, http.HTTPStatus.NOT_FOUND
+
+        return {'message': 'delete success'}, http.HTTPStatus.NO_CONTENT
+
+
 video_api.add_resource(VideoItem, '/api/video/<int:video_id>')
 video_api.add_resource(VideoList, '/api/videos')
 video_api.add_resource(UploadFiles, '/api/files')
-video_api.add_resource(SubVideos, '/api/video/<int:video_id>/subvideos')
+video_api.add_resource(SubVideoList, '/api/video/<int:video_id>/subvideos')
+video_api.add_resource(
+    SubVideoItem,
+    '/api/video/<int:video_id>/subvideos/<string:subvideo_name>'
+)
