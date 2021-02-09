@@ -237,6 +237,7 @@ class SubVideoItem(Resource):
     The api of video's subvideo item
     """
 
+    @swag_from(os.path.join(BASE_DIR, 'docs/video/subvideo_delete.yml'), methods=['delete'])
     def delete(self, video_id, subvideo_name):
         """
         delete api for subvideos

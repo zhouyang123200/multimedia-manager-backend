@@ -30,6 +30,13 @@ class VideoFile(FileMixin, BaseMixin, db.Model):
     def __repr__(self):
         return '<VidelFile %r>' % self.id
 
+    def delete(self):
+        """
+        delete this entry and related file
+        """
+        os.remove(self.file_path)
+        super(VideoFile, self).delete()
+
 
 class ImageFile(FileMixin, BaseMixin, db.Model):
     """

@@ -157,6 +157,7 @@ def test_subvideo_delete(app, shared_datadir):
     assert response.status_code == HTTPStatus.NO_CONTENT
     response = app.test_client().delete(test_uri)
     assert response.status_code == HTTPStatus.NOT_FOUND
+    assert not os.path.exists(video_dst)
 
 def test_api_limiter(app):
     """
