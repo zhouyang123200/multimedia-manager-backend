@@ -201,7 +201,7 @@ class UserAvatarResource(Resource):
 
 
 user_api.add_resource(UserList, '/api/users')
-user_api.add_resource(TokenResource, '/api/token')
-user_api.add_resource(RevokeResource, '/api/revoke')
+user_api.add_resource(TokenResource, '/api/authtoken')
+user_api.add_resource(RevokeResource, '/api/authtokenrevoke')
 user_api.add_resource(UserActivateResource, '/api/users/activate/<regex("[a-zA-Z.0-9-_]+"):token>')
 user_api.add_resource(UserAvatarResource, '/api/user/avatar')

@@ -41,14 +41,14 @@ def test_post_token(app):
     """
     test post user data and get token api
     """
-    test_uri = '/api/token'
+    test_uri = '/api/authtoken'
     create_user(app)
     client = app.test_client()
     responses = client.post(test_uri, json=USERDATA)
     data = json.loads(responses.data)
     assert 'access_token' in data
 
-    test_uri = '/api/revoke'
+    test_uri = '/api/authtokenrevoke'
     responses = client.post(test_uri, headers={'Authorization': 'Bearer {}'.\
         format(data['access_token'])})
     assert responses.status_code == 200
