@@ -1,0 +1,32 @@
+auth token post api
+---
+tags:
+  - authtoken
+summary: user sign in api
+operationId: addUser
+consumes:
+  - application/json
+produces:
+- application/json
+parameters:
+  - in: body
+    name: body
+    description: user info that needs to be added
+    schema:
+      type: object
+      required:
+        - username
+        - passwd
+      properties:
+        username:
+          type: string
+        passwd:
+          type: string
+responses:
+  201:
+    description: create succeed
+    schema:
+      type: object
+      properties:
+        access_token:
+          type: string

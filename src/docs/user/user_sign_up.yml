@@ -1,0 +1,47 @@
+user post api
+---
+tags:
+  - user
+summary: new user sign up api
+operationId: addUser
+consumes:
+  - application/json
+produces:
+- application/json
+parameters:
+  - in: body
+    name: body
+    description: user info that needs to be added
+    schema:
+      type: object
+      required:
+        - username
+        - email
+        - passwd
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        passwd:
+          type: string
+responses:
+  400:
+    description: user not activated
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: the user is not activate
+  201:
+    description: create succeed
+    schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
