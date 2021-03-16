@@ -7,6 +7,7 @@ import pathlib
 from http import HTTPStatus
 from flask import Blueprint, request, current_app, url_for
 from flask_restful import Api, Resource
+from flasgger import swag_from
 from flask_jwt_extended import (
     create_access_token,
     get_jwt_identity,
@@ -18,6 +19,7 @@ from api.models import User, UserSchema, AvatarSchema
 from api.utils.request_validate import mash_load_validate
 from api.utils.passwd import check_password, verify_token, generate_token
 from api.utils.tasks import send_mail
+from api.utils.base import BASE_DIR
 
 user_route = Blueprint('user_route', __name__)
 user_api = Api(user_route)
@@ -53,6 +55,7 @@ class UserList(Resource):
 
     user_schema = UserSchema()
 
+    @swag_from(os.path.join(BASE_DIR, 'docs/user/user_sign_up.yml'), methods=['post'])
     def post(self):
         """
         user sign in api and send email
@@ -77,6 +80,7 @@ class TokenResource(Resource):
     jwt token generate api
     """
 
+    @swag_from(os.path.join(BASE_DIR, 'docs/user/user_sign_in.yml'), methods=['post'])
     def post(self):
         """
         create token
