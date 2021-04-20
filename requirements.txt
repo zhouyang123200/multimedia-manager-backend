@@ -51,7 +51,7 @@ pika==0.13.0
 pluggy==0.13.1
 prompt-toolkit==3.0.8
 ptyprocess==0.7.0
-py==1.8.1
+py==1.10.0
 PyAMQP==0.1.0.7
 pycodestyle==2.5.0
 Pygments==2.7.4
