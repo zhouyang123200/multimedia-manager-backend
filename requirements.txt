@@ -55,7 +55,7 @@ py==1.8.1
 PyAMQP==0.1.0.7
 pycodestyle==2.5.0
 Pygments==2.7.4
-PyJWT==1.7.1
+PyJWT==2.4.0
 pylint==2.6.0
 pylint-flask==0.6
 pylint-flask-sqlalchemy==0.2.0
